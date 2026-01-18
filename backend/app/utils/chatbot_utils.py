@@ -4,8 +4,8 @@ from langchain_core.messages.utils import (
 )
 
 def pre_model_hook(state):
-    """ Gọi mỗi khi Agent được gọi trước khi gửi vào LLM.
-    Dùng để cắt bớt lịch sử hội thoại nếu vượt quá giới hạn token"""
+    """ Called each time Agent is invoked before sending to LLM.
+    Used to truncate conversation history if it exceeds token limit"""
     trimmed_messages = trim_messages(
         state["messages"],
         strategy="last",

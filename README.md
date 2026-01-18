@@ -458,3 +458,10 @@ Backend APIs ready but not integrated yet:
 - `DELETE /api/v1/chat/messages` - Clear history
 
 See `backend/CHAT_DATABASE_GUIDE.md` for integration steps. -->
+
+
+### Run Command
+
+```
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```

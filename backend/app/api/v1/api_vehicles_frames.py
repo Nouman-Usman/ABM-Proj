@@ -1,37 +1,37 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
-from api import v1
+from . import state
 import asyncio
-from services.road_services.AnalyzeOnRoadForMultiProcessing import AnalyzeOnRoadForMultiprocessing
+from ...services.road_services.AnalyzeOnRoadForMultiProcessing import AnalyzeOnRoadForMultiprocessing
 from fastapi.responses import Response
 from fastapi import WebSocket, WebSocketDisconnect
-from utils.jwt_handler import get_current_user, get_current_user_ws
+from ...utils.jwt_handler import get_current_user, get_current_user_ws
 from fastapi import Depends
-from utils.transport_utils import enrich_info_with_thresholds
+from ...utils.transport_utils import enrich_info_with_thresholds
 
 router = APIRouter()
 
 @router.on_event("startup")
 def start_up():
-    if v1.state.analyzer is None:
-        v1.state.analyzer = AnalyzeOnRoadForMultiprocessing()
-        v1.state.analyzer.run_multiprocessing()
+    if state.analyzer is None:
+        state.analyzer = AnalyzeOnRoadForMultiprocessing()
+        state.analyzer.run_multiprocessing()
 
 @router.get(
     path='/roads_name',
-    summary="Lấy danh sách tên đường",
-    description="API trả về danh sách tên các tuyến đường đang được giám sát trong hệ thống. Endpoint này KHÔNG yêu cầu xác thực JWT."
+    summary="Get road name list",
+    description="API returns list of road names being monitored in the system. This endpoint DOES NOT require JWT authentication."
 )
 async def get_road_names():
     """
-    API trả về danh sách tên các tuyến đường (KHÔNG xác thực JWT).
-    Endpoint này là public để frontend có thể load danh sách đường trước khi user login.
+    API returns list of road names (NO JWT authentication required).
+    This endpoint is public so frontend can load road list before user login.
     """
-    return JSONResponse(content={"road_names": v1.state.analyzer.names})
+    return JSONResponse(content={"road_names": state.analyzer.names})
 
 @router.websocket(
     "/ws/frames/{road_name}",
-    name="WebSocket trả về frame hình ảnh tuyến đường, có xác thực qua header, cookie, query params",
+    name="WebSocket returns road image frames with authentication via header, cookie, query params",
     )
 async def websocket_frames(
     websocket: WebSocket, 
@@ -39,20 +39,20 @@ async def websocket_frames(
     current_user = Depends(get_current_user_ws)
 ):
     """
-    WebSocket endpoint để stream video frames của tuyến đường theo thời gian thực.
+    WebSocket endpoint to stream video frames of road in real-time.
     
     Args:
-        road_name: Tên tuyến đường cần xem
-        current_user: User đã được xác thực (tự động inject bởi FastAPI)
+        road_name: Name of road to view
+        current_user: Authenticated user (auto-injected by FastAPI)
         
     Authentication:
-        Yêu cầu token qua query params (?token=...), cookie (access_token), hoặc header (Authorization: Bearer ...)
+        Requires token via query params (?token=...), cookie (access_token), or header (Authorization: Bearer ...)
     """
     await websocket.accept()
     
     try:
         while True:
-            frame_bytes = await asyncio.to_thread(v1.state.analyzer.get_frame_road, road_name)
+            frame_bytes = await asyncio.to_thread(state.analyzer.get_frame_road, road_name)
             await websocket.send_bytes(frame_bytes)
             await asyncio.sleep(1/30)
     except WebSocketDisconnect:
@@ -63,7 +63,7 @@ async def websocket_frames(
         
 @router.websocket(
     "/ws/info/{road_name}",
-    name="WebSocket trả về thông tin phương tiện tuyến đường có xác thực qua header, cookie, query params",
+    name="WebSocket returns road vehicle information with authentication via header, cookie, query params",
 )
 async def websocket_info(
     websocket: WebSocket, 
@@ -71,23 +71,23 @@ async def websocket_info(
     current_user = Depends(get_current_user_ws)
 ):
     """
-    WebSocket endpoint để nhận thông tin phương tiện của tuyến đường theo thời gian thực.
+    WebSocket endpoint to receive vehicle information of road in real-time.
     
     Args:
-        road_name: Tên tuyến đường cần xem thông tin
-        current_user: User đã được xác thực (tự động inject bởi FastAPI)
+        road_name: Name of road to view information
+        current_user: Authenticated user (auto-injected by FastAPI)
         
     Authentication:
-        Yêu cầu token qua query params (?token=...), cookie (access_token), hoặc header (Authorization: Bearer ...)
+        Requires token via query params (?token=...), cookie (access_token), or header (Authorization: Bearer ...)
     
     Returns:
-        JSON data chứa thông tin phương tiện, cập nhật mỗi 5 giây
+        JSON data containing vehicle information, updated every 5 seconds
     """
     await websocket.accept()
     
     try:
         while True:
-            data = await asyncio.to_thread(v1.state.analyzer.get_info_road, road_name)
+            data = await asyncio.to_thread(state.analyzer.get_info_road, road_name)
             # Enrich with per-road thresholds classification when possible
             try:
                 enriched = enrich_info_with_thresholds(data, road_name)
@@ -104,17 +104,17 @@ async def websocket_info(
 
 @router.get(
     path='/info/{road_name}',
-    summary="Lấy thông tin phương tiện trên đường",
-    description="API trả về thông tin phương tiện của tuyến đường (số lượng xe, tốc độ trung bình, v.v.). Endpoint này KHÔNG yêu cầu xác thực JWT."
+    summary="Get vehicle information on road",
+    description="API returns vehicle information of road (number of vehicles, average speed, etc.). This endpoint DOES NOT require JWT authentication."
 )
 async def get_info_road(road_name: str):
     """
-    API trả về thông tin phương tiện của tuyến đường road_name (KHÔNG xác thực JWT).
+    API returns vehicle info for the road (no JWT authentication).
     """
-    data = await asyncio.to_thread(v1.state.analyzer.get_info_road, road_name)
+    data = await asyncio.to_thread(state.analyzer.get_info_road, road_name)
     if data is None:
         return JSONResponse(content={
-            "Lỗi: Dữ liệu bị lỗi, kiểm tra road_services"
+            "Error: Data error, check road_services"
             }, status_code=500)
     # Enrich with per-road thresholds classification when possible
     try:
@@ -126,27 +126,27 @@ async def get_info_road(road_name: str):
 
 @router.get(
     path='/frames/{road_name}',
-    summary="Lấy frame hình ảnh của đường (có xác thực)",
-    description="API trả về frame hình ảnh (JPEG) hiện tại của tuyến đường. Yêu cầu xác thực JWT qua Authorization header, cookie, hoặc query parameter (?token=...)."
+    summary="Get road image frame (authenticated)",
+    description="API returns current road image frame (JPEG). Requires JWT authentication via Authorization header, cookie, or query parameter (?token=...)."
 )
 async def get_frame_road(road_name: str, current_user=Depends(get_current_user)):
     """
-    Lấy frame hình ảnh hiện tại của tuyến đường (yêu cầu xác thực).
+    Get current road image frame (requires authentication).
     
     Args:
-        road_name: Tên tuyến đường
-        current_user: User đã được xác thực (tự động inject bởi FastAPI)
+        road_name: Name of road
+        current_user: Authenticated user (auto-injected by FastAPI)
     
     Authentication:
-        Token có thể được gửi qua: OAUTH2
+        Token can be sent via: OAUTH2
     
     Returns:
-        Response: Image JPEG của frame hiện tại
+        Response: Image JPEG of the current frame
     """
-    frame_bytes = await asyncio.to_thread(v1.state.analyzer.get_frame_road, road_name)
+    frame_bytes = await asyncio.to_thread(state.analyzer.get_frame_road, road_name)
     if frame_bytes is None:
         return JSONResponse(
-            content={"error": "Lỗi: Dữ liệu bị lỗi, kiểm tra core"},
+            content={"error": "Error: Data error, check core"},
             status_code=500
         )
     return Response(content=frame_bytes, media_type="image/jpeg")
@@ -154,14 +154,14 @@ async def get_frame_road(road_name: str, current_user=Depends(get_current_user))
 
 @router.get(
     path='/frames_no_auth/{road_name}',
-    summary="Lấy frame hình ảnh (không xác thực)",
-    description="API trả về frame hình ảnh (JPEG) hiện tại của tuyến đường. Endpoint này KHÔNG yêu cầu xác thực JWT - dùng cho mục đích demo hoặc public."
+    summary="Get image frame (no authentication)",
+    description="API returns current road image frame (JPEG). This endpoint DOES NOT require JWT authentication - for demo or public use."
 )   
 async def get_frame_road_no_auth(road_name: str):
-    frame_bytes = await asyncio.to_thread(v1.state.analyzer.get_frame_road, road_name)
+    frame_bytes = await asyncio.to_thread(state.analyzer.get_frame_road, road_name)
     if frame_bytes is None:
         return JSONResponse(
-            content={"error": "Lỗi: Dữ liệu bị lỗi, kiểm tra core"},
+            content={"error": "Error: Data error, check core"},
             status_code=500
         )
     return Response(content=frame_bytes, media_type="image/jpeg")

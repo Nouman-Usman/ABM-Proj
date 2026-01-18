@@ -116,7 +116,7 @@ const VideoModal = ({
                   <div className="w-full h-full flex items-center justify-center text-white">
                     <div className="text-center">
                       <div className="w-12 h-12 sm:w-16 sm:h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-                      <p className="text-sm sm:text-base">Đang tải video...</p>
+                      <p className="text-sm sm:text-base">Loading video...</p>
                     </div>
                   </div>
                 )}
@@ -128,17 +128,17 @@ const VideoModal = ({
               <div className="p-3 sm:p-4 bg-gray-50 dark:bg-gray-800 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-700 overflow-y-auto w-full lg:w-80 max-h-[40vh] lg:max-h-[80vh]">
                 <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4 text-gray-900 dark:text-white flex items-center space-x-2">
                   <Timer className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
-                  <span>Thông Tin Giao Thông</span>
+                  <span>Traffic Information</span>
                 </h3>
 
                 {/* Traffic Status Section */}
                 <div className="mb-3 sm:mb-4 bg-white dark:bg-gray-900 p-2 sm:p-3 rounded-lg shadow-sm">
                   <h4 className="text-xs sm:text-sm font-medium mb-2 sm:mb-3 text-gray-800 dark:text-gray-200 flex items-center gap-2">
                     <Timer className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
-                    Tình Trạng
+                    Status
                   </h4>
                   <div className="space-y-2">
-                    {/* Đánh giá về số lượng phương tiện */}
+                    {/* Assessment of vehicle quantity */}
                     <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       {(() => {
                         // Prefer backend-provided label
@@ -149,10 +149,10 @@ const VideoModal = ({
                             return (
                               <div className="flex items-center justify-between">
                                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                                  Mật độ:
+                                  Density:
                                 </span>
                                 <span className="font-medium text-xs sm:text-sm bg-red-100 dark:bg-red-900 px-2 py-1 rounded text-red-700 dark:text-red-300">
-                                  {densityFromBackend}
+                                  Congested
                                 </span>
                               </div>
                             );
@@ -161,10 +161,10 @@ const VideoModal = ({
                             return (
                               <div className="flex items-center justify-between">
                                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                                  Mật độ:
+                                  Density:
                                 </span>
                                 <span className="font-medium text-xs sm:text-sm bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded text-yellow-700 dark:text-yellow-300">
-                                  {densityFromBackend}
+                                  Busy
                                 </span>
                               </div>
                             );
@@ -172,10 +172,10 @@ const VideoModal = ({
                           return (
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-gray-600 dark:text-gray-400">
-                                Mật độ:
+                                Density:
                               </span>
                               <span className="font-medium text-xs sm:text-sm bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-700 dark:text-green-300">
-                                {densityFromBackend}
+                                Clear
                               </span>
                             </div>
                           );
@@ -190,10 +190,10 @@ const VideoModal = ({
                           return (
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-gray-600 dark:text-gray-400">
-                                Mật độ:
+                                Density:
                               </span>
                               <span className="font-medium text-xs sm:text-sm bg-red-100 dark:bg-red-900 px-2 py-1 rounded text-red-700 dark:text-red-300">
-                                Tắc nghẽn
+                                Congested
                               </span>
                             </div>
                           );
@@ -201,10 +201,10 @@ const VideoModal = ({
                           return (
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-gray-600 dark:text-gray-400">
-                                Mật độ:
+                                Density:
                               </span>
                               <span className="font-medium text-xs sm:text-sm bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded text-yellow-700 dark:text-yellow-300">
-                                Đông đúc
+                                Busy
                               </span>
                             </div>
                           );
@@ -212,17 +212,17 @@ const VideoModal = ({
                         return (
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-gray-600 dark:text-gray-400">
-                              Mật độ:
+                              Density:
                             </span>
                             <span className="font-medium text-xs sm:text-sm bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-700 dark:text-green-300">
-                              Thông thoáng
+                              Clear
                             </span>
                           </div>
                         );
                       })()}
                     </div>
 
-                    {/* Đánh giá về tốc độ */}
+                    {/* Assessment of speed */}
                     <div className="p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       {(() => {
                         const speedFromBackend = (trafficData as any)
@@ -232,10 +232,10 @@ const VideoModal = ({
                             return (
                               <div className="flex items-center justify-between">
                                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                                  Vận tốc:
+                                  Speed:
                                 </span>
                                 <span className="font-medium text-xs sm:text-sm bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-700 dark:text-green-300">
-                                  {speedFromBackend}
+                                  Fast
                                 </span>
                               </div>
                             );
@@ -243,10 +243,10 @@ const VideoModal = ({
                           return (
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-gray-600 dark:text-gray-400">
-                                Vận tốc:
+                                Speed:
                               </span>
                               <span className="font-medium text-xs sm:text-sm bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded text-orange-700 dark:text-orange-300">
-                                {speedFromBackend}
+                                Slow
                               </span>
                             </div>
                           );
@@ -262,10 +262,10 @@ const VideoModal = ({
                           return (
                             <div className="flex items-center justify-between">
                               <span className="text-xs text-gray-600 dark:text-gray-400">
-                                Vận tốc:
+                                Speed:
                               </span>
                               <span className="font-medium text-xs sm:text-sm bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-700 dark:text-green-300">
-                                Nhanh chóng
+                                Fast
                               </span>
                             </div>
                           );
@@ -273,10 +273,10 @@ const VideoModal = ({
                         return (
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-gray-600 dark:text-gray-400">
-                              Vận tốc:
+                              Speed:
                             </span>
                             <span className="font-medium text-xs sm:text-sm bg-orange-100 dark:bg-orange-900 px-2 py-1 rounded text-orange-700 dark:text-orange-300">
-                              Chậm chạp
+                              Slow
                             </span>
                           </div>
                         );
@@ -289,12 +289,12 @@ const VideoModal = ({
                 <div className="mb-2 bg-white dark:bg-gray-900 p-2 sm:p-3 rounded-lg shadow-sm">
                   <h4 className="text-xs sm:text-sm font-medium mb-2 text-gray-800 dark:text-gray-200 flex items-center gap-2">
                     <Car className="h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
-                    Thông Tin Ô Tô
+                    Car Information
                   </h4>
                   <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex justify-between items-center p-1.5 sm:p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <span className="text-xs text-gray-600 dark:text-gray-400">
-                        Số lượng:
+                        Quantity:
                       </span>
                       <span className="font-medium text-xs sm:text-sm bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-blue-700 dark:text-blue-300">
                         {trafficData?.count_car || 0}
@@ -302,7 +302,7 @@ const VideoModal = ({
                     </div>
                     <div className="flex justify-between items-center p-1.5 sm:p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <span className="text-xs text-gray-600 dark:text-gray-400">
-                        Vận tốc:
+                        Speed:
                       </span>
                       <span className="font-medium text-xs sm:text-sm bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-700 dark:text-green-300">
                         {trafficData?.speed_car || 0} km/h
@@ -315,12 +315,12 @@ const VideoModal = ({
                 <div className="mb-2 bg-white dark:bg-gray-900 p-2 sm:p-3 rounded-lg shadow-sm">
                   <h4 className="text-xs sm:text-sm font-medium mb-2 text-gray-800 dark:text-gray-200 flex items-center gap-2">
                     <Bike className="h-3 w-3 sm:h-4 sm:w-4 text-purple-500" />
-                    Thông Tin Xe Máy
+                    Motorcycle Information
                   </h4>
                   <div className="space-y-1.5 sm:space-y-2">
                     <div className="flex justify-between items-center p-1.5 sm:p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <span className="text-xs text-gray-600 dark:text-gray-400">
-                        Số lượng:
+                        Quantity:
                       </span>
                       <span className="font-medium text-xs sm:text-sm bg-purple-100 dark:bg-purple-900 px-2 py-1 rounded text-purple-700 dark:text-purple-300">
                         {trafficData?.count_motor || 0}
@@ -328,7 +328,7 @@ const VideoModal = ({
                     </div>
                     <div className="flex justify-between items-center p-1.5 sm:p-2 bg-gray-50 dark:bg-gray-800 rounded">
                       <span className="text-xs text-gray-600 dark:text-gray-400">
-                        Vận tốc:
+                        Speed:
                       </span>
                       <span className="font-medium text-xs sm:text-sm bg-green-100 dark:bg-green-900 px-2 py-1 rounded text-green-700 dark:text-green-300">
                         {trafficData?.speed_motor || 0} km/h

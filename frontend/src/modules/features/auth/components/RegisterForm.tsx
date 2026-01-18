@@ -36,12 +36,12 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp!");
+      setError("Password confirmation does not match!");
       return;
     }
 
     if (password.length < 8) {
-      setError("Mật khẩu phải có ít nhất 8 ký tự!");
+      setError("Password must be at least 8 characters long!");
       return;
     }
 
@@ -68,15 +68,15 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
       if (res.ok) {
         setSuccess(true);
         onRegisterSuccess?.();
-        // Chuyển hướng đến trang đăng nhập sau 2 giây
+        // Redirect to login page after 2 seconds
         setTimeout(() => {
           navigate("/login");
         }, 2000);
       } else {
-        setError(data.detail || "Đăng ký tài khoản thất bại!");
+        setError(data.detail || "Account registration failed!");
       }
     } catch {
-      setError("Có lỗi xảy ra. Vui lòng thử lại.");
+      setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -90,10 +90,10 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
             <Car className="w-8 h-8 text-white" />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Đăng ký tài khoản
+            Create Account
           </CardTitle>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Tạo tài khoản mới để sử dụng hệ thống
+            Create a new account to use the system
           </p>
         </CardHeader>
         <CardContent className="px-8 pb-8">
@@ -103,7 +103,7 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <Input
-                  placeholder="Tên đăng nhập"
+                  placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
@@ -129,7 +129,7 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
                 <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <Input
                   type="tel"
-                  placeholder="Số điện thoại"
+                  placeholder="Phone Number"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
@@ -142,7 +142,7 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Mật khẩu"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -167,7 +167,7 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Nhập lại mật khẩu"
+                  placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
@@ -192,7 +192,7 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
             {success && (
               <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg text-sm flex items-center">
                 <CheckCircle className="w-5 h-5 mr-2" />
-                Đăng ký tài khoản thành công! Đang chuyển hướng...
+                Account registration successful! Redirecting...
               </div>
             )}
             {error && (
@@ -211,22 +211,22 @@ function Register({ onRegisterSuccess }: { onRegisterSuccess?: () => void }) {
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Đang đăng ký...
+                  Creating account...
                 </div>
               ) : (
-                "Đăng ký"
+                "Create Account"
               )}
             </Button>
 
             {/* Login Link */}
             <p className="text-center text-gray-600 dark:text-gray-300">
-              Đã có tài khoản?{" "}
+              Already have an account?{" "}
               <button
                 type="button"
                 onClick={() => navigate("/login")}
                 className="text-purple-600 dark:text-blue-400 hover:underline font-medium"
               >
-                Đăng nhập ngay
+                Sign In Now
               </button>
             </p>
           </form>

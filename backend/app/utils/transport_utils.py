@@ -2,22 +2,22 @@ import numpy as np
 import cv2
 import time
 from typing import Any, Dict
-from core.config import get_threshold_for_road
+from ..core.config import get_threshold_for_road
 
 def convert_frame_to_byte(img: np.array) -> bytes:
-    """ Hàm chuyển đổi ảnh dạng numpy sang bytes
+    """ Function to convert image from numpy format to bytes
     Args:
-        img (np.array): dũ liệu ảnh được đọc bởi cv2
+        img (np.array): image data read by cv2
 
     Returns:
-        bytes: mã bytes
+        bytes: byte code
     """
     if img is not None:
         try:
             _, jpeg = cv2.imencode('.jpg', img)
             return jpeg.tobytes()
         except Exception as e:
-            print(f"Lỗi chuyển đổi sang bytes {e}")
+            print(f"Error converting to bytes {e}")
             return None
     return None
 
@@ -31,11 +31,11 @@ def avg_none_zero_batch(
     motor_counts: list,
     motor_speeds: list,
 ):
-    """Tính trung bình bỏ qua 0 cho 4 list cùng lúc.
-    Trả về tuple (count_car_avg, speed_car_avg, count_motor_avg, speed_motor_avg).
-    Làm gọn code và giảm overhead gọi hàm lặp đi lặp lại.
+    """Calculate average ignoring 0 for 4 lists simultaneously.
+    Returns tuple (count_car_avg, speed_car_avg, count_motor_avg, speed_motor_avg).
+    Makes code concise and reduces overhead from repeated function calls.
     """
-    # Sử dụng list comprehension nhanh, tránh tạo numpy array không cần thiết
+    # Use fast list comprehension, avoid creating unnecessary numpy array
     def _avg(lst):
         non_zero = [x for x in lst if x > 1]
         return (sum(non_zero) // len(non_zero)) if non_zero else 0
@@ -48,12 +48,12 @@ def avg_none_zero_batch(
     )
     
 def log(names : str, shared_data : dict) -> str:
-    """Hàm in ra log thông tin các processing
-    Hàm này lấy data tổng thể ở share_data (Manager.dict() dùng để giao tiếp các process với nhau)
-    Đặt hàm này là static method vì để tránh việc sử dụng multiprocessing bị lỗi do nó sẽ picke các biến\
-    liên quan đến hàm để chuyển dữ liệu sang process con, đặc biệt là self chứa các tool của YOLO\
-    và các biến khác không thể picke được.Dùng @staticmethod để tránh pickle cả class instance. Chỉ \
-    truyền những tham số cần thiết, không truyền toàn bộ self"""
+    """Function to print log information of processing
+    This function gets overall data from share_data (Manager.dict() used for inter-process communication)
+    Set this function as static method because to avoid multiprocessing errors from pickling variables
+    related to the function to transfer data to child process, especially self containing YOLO tools
+    and other variables that cannot be pickled. Use @staticmethod to avoid pickling the entire class instance. Only
+    pass necessary parameters, don't pass entire self"""
     
     YELLOW = "\033[93m"
     GREEN = "\033[92m"
@@ -64,7 +64,7 @@ def log(names : str, shared_data : dict) -> str:
     try:
         while True:
             print(f"{BOLD}{CYAN}--------------------------------------- [Log at {time.strftime('%H:%M:%S')}] --------------------------------------------{RESET}")
-            print(f"{BOLD}| {'Tuyến đường':<25} | {'Thông tin':<70} |{RESET}")
+            print(f"{BOLD}| {'Road Name':<25} | {'Information':<70} |{RESET}")
             print(f"{'-'*102}")
             
             for name in names:
@@ -78,17 +78,17 @@ def log(names : str, shared_data : dict) -> str:
                         speed_car = info_dict.get('speed_car', 0)
                         speed_motor = info_dict.get('speed_motor', 0)
                     
-                        info_str = f"Ô tô: {count_car} xe, Vtb: {speed_car} km/h | Xe máy: {count_motor} xe, Vtb: {speed_motor} km/h"
+                        info_str = f"Cars: {count_car} vehicles, Avg speed: {speed_car} km/h | Motorcycles: {count_motor} vehicles, Avg speed: {speed_motor} km/h"
                         print(f"| {YELLOW}{name:<25}{RESET} | {GREEN}{info_str:<70}{RESET} |")
                     else:
-                        print(f"| {YELLOW}{name:<25}{RESET} | {GREEN}{'Đang khởi tạo...':<70}{RESET} |")
+                        print(f"| {YELLOW}{name:<25}{RESET} | {GREEN}{'Initializing...':<70}{RESET} |")
                 except Exception as e:
-                    print(f"| {YELLOW}{name:<25}{RESET} | {GREEN}{f'Lỗi: {str(e)}':<70}{RESET} |")
+                    print(f"| {YELLOW}{name:<25}{RESET} | {GREEN}{f'Error: {str(e)}':<70}{RESET} |")
             
             print(f"{'-'*102}\n\n")
             time.sleep(5)
     except KeyboardInterrupt:
-        print("Kết thúc log.")
+        print("Log ended.")
         
     
 
@@ -111,14 +111,14 @@ def enrich_info_with_thresholds(data: Dict[str, Any], road_name: str) -> Dict[st
 
         total = count_car + count_motor
         if total > threshold["c2"]:
-            density_status = "Tắc nghẽn"
+            density_status = "Congested"
         elif total > threshold["c1"]:
-            density_status = "Đông đúc"
+            density_status = "Busy"
         else:
-            density_status = "Thông thoáng"
+            density_status = "Clear"
 
         avg_speed = (speed_car + speed_motor) / 2 if (speed_car or speed_motor) else 0
-        speed_status = "Nhanh chóng" if avg_speed >= threshold["v"] else "Chậm chạp"
+        speed_status = "Fast" if avg_speed >= threshold["v"] else "Slow"
 
         # Attach computed fields
         data["density_status"] = density_status

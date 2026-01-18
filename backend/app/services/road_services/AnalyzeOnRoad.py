@@ -1,40 +1,40 @@
 import os
 from overrides import override
-from services.road_services.AnalyzeOnRoadBase import AnalyzeOnRoadBase
-from core.config import settings_metric_transport
-# Đặt như này để tránh trường hợp lỗi do dùng chung thư viện AI 
+from .AnalyzeOnRoadBase import AnalyzeOnRoadBase
+from ...core.config import settings_metric_transport
+# Set this way to avoid errors from using shared AI library
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 class AnalyzeOnRoad(AnalyzeOnRoadBase):
-    """Class này kế thừa từ class Base (xử lý tuần tự). Class con này chưa phải là code để multiprocessing\
-    mà chỉ là một chút cải tiến từ code base (class Base) để có thể vừa xử lý video đầu vào ở một process\
-    khác vừa có thể truy xuất thông tin về kết quả mà không bị hiện tượng tranh chấp dữ liệu    
-    """    
+    """This class inherits from Base class (sequential processing). This child class is not yet code for multiprocessing\
+    but just a slight improvement from the base code (class Base) to be able to process input video in one process\
+    while being able to access result information without data race conditions.
+    """
     def __init__(self, path_video, meter_per_pixel, info_dict, frame_dict, region, model_path = settings_metric_transport.MODELS_PATH, time_step=30,
                  is_draw=True, device= settings_metric_transport.DEVICE, iou=0.3, conf=0.2, show=True):
-        """Class này kế thừa từ class Base (xử lý tuần tự). Class con này chưa phải là code để multiprocessing\
-        mà chỉ là một chút cải tiến từ code base (class Base) để có thể vừa xử lý video đầu vào ở một process\
-        khác vừa có thể truy xuất thông tin về kết quả mà không bị hiện tượng tranh chấp dữ liệu
+        """This class inherits from the Base class (sequential processing). This subclass is not code for multiprocessing
+        but rather a slight improvement from the base code (Base class) to be able to process input video in a separate process
+        while also being able to retrieve result information without data race conditions.
 
         Args:
-            path_video (str): Đường dẫn đến video
-            meter_per_pixel (float): Tỉ lệ 1 mét ngoài đời với 1 pixel
-            info_dict (Manager().dict()): Một dict dùng để chia sẽ giữ liệu trung gian giữa các process với nhau,\
-            mặc định là sẽ được truyền tham chiếu và nó sẽ được thay đỏi nếu các process con thay đổi nó cho nên\
-            ta có thể truy cập dữ liệu kết quả xử lý ở bên ngoài dễ dàng nhưng phải đảm bảo truy cập an toàn
-            frame_dict (Manager().dict()): Tương tự info_dict nhưng dùng để chứa thông tin ảnh dạng bytecode đã được encode
-            do manager() không hỗ trợ kiểu này nên ta sẽ dùng dict trung gian để chưa mã bytecode đó ở value (key là "frame")
-            model_path (str): Đường dẫn đến model. Defaults to "best.pt".
-            time_step (int): Khoảng thời gian giữa 2 lần cập nhật thông tin các phương tiện. Defaults to 30.
-            is_draw (bool): Biến chỉ định có vẽ các thông tin xử lý được lên frame hay không. Defaults to True.
-            device (str): Dùng GPU hoặc CPU. Defaults to 'cpu'.
-            iou (float): Ngưỡng tin cậy về bounding box . Defaults to 0.3.
-            conf (float): Ngưỡng tin cậy về nhãn được dự đoán. Defaults to 0.2.
-            show (bool): Hiển thị video xử lý qua opencv, đặt là False khi tích làm server tránh lãng phí tài nguyên.\
+            path_video (str): Path to the video file
+            meter_per_pixel (float): Ratio of 1 real-world meter to 1 pixel
+            info_dict (Manager().dict()): Dict for sharing intermediate data between processes.
+            By default, it's passed by reference and will be updated if child processes modify it,
+            so we can easily access processing results outside but must ensure safe access.
+            frame_dict (Manager().dict()): Similar to info_dict but stores encoded byte-format image information.
+            Since manager() doesn't support this type, we use an intermediate dict to store the byte code in its value (key is "frame")
+            model_path (str): Path to the model. Defaults to "best.pt".
+            time_step (int): Time interval between 2 vehicle information updates. Defaults to 30.
+            is_draw (bool): Variable specifying whether to draw processed information on the frame. Defaults to True.
+            device (str): Use GPU or CPU. Defaults to 'cpu'.
+            iou (float): Confidence threshold for bounding box. Defaults to 0.3.
+            conf (float): Confidence threshold for predicted labels. Defaults to 0.2.
+            show (bool): Display processed video via opencv, set to False when using as server to avoid wasting resources.
             Defaults to True.
             
-        Examples:`
-        Hướng dẫn chạy xử lý 1 video đơn
+        Examples:
+        Instructions for running single video processing
         >>> analyzer = AnalyzeOnRoad(
         >>>     path_video=path_video,
         >>>     meter_per_pixel=meter_per_pixel,
@@ -51,30 +51,30 @@ class AnalyzeOnRoad(AnalyzeOnRoadBase):
 
     @override
     def update_for_frame(self):
-        """Cập nhật frame đang xử lý hiện tại gán vào Manage.dict() để chia sẽ dữ liệu các process với nhau dễ dàng. 
+        """Update current processing frame and assign to Manager.dict() to easily share data between processes.
         """
         try: 
            self.frame_dict["frame"] = self.frame_output
         except Exception as e:
-            print(f"Lỗi khi cập nhật frame mới nhất của {self.name}: {e}")
+            print(f"Error updating latest frame of {self.name}: {e}")
 
     @override
     def update_for_vehicle(self):
-        """Hàm cập nhật thông tin về processing đang xử lý hiện tại và gán vào Manage.dict() để chia sẽ với nhau."""
+        """Function to update information about current processing and assign to Manager.dict() to share with each other."""
         try:
             self.info_dict["count_car"] = self.count_car_display
             self.info_dict["count_motor"] = self.count_motor_display
             self.info_dict["speed_car"] = self.speed_car_display
             self.info_dict["speed_motor"] = self.speed_motor_display
         except Exception as e:
-            print(f"Lỗi khi update thông tin phương tiện của {self.name}: {e}")
+            print(f"Error updating vehicle information of {self.name}: {e}")
 
-#************************************************************************ Script for testing *******************************************************
+#******************************************************** Script for testing *********************************************************
 if __name__ == "__main__":
     from multiprocessing import Manager
     manager = Manager()
   
-    path_video = "./video_test/Đường Láng.mp4"
+    path_video = "./video_test/Lang_Street.mp4"
     meter_per_pixel = 0.04
     info_dict = manager.dict({"count_car": 0,
                              "count_motor": 0,

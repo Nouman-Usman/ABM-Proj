@@ -9,16 +9,16 @@ from sqlalchemy import delete
 from typing import List, Optional
 from datetime import datetime
 
-from utils.jwt_handler import get_current_user
-from models.user import User
-from models.chat_message import ChatMessage
-from schemas.ChatMessage import (
+from ...utils.jwt_handler import get_current_user
+from ...models.user import User
+from ...models.chat_message import ChatMessage
+from ...schemas.ChatMessage import (
     ChatMessageCreate,
     ChatMessageResponse,
     ChatMessageListResponse,
     ChatHistoryQuery,
 )
-from db.base import get_db
+from ...db.base import get_db
 
 router = APIRouter()
 
@@ -27,8 +27,8 @@ router = APIRouter()
     "/messages",
     response_model=ChatMessageResponse,
     status_code=201,
-    summary="Lưu tin nhắn chat",
-    description="API lưu một tin nhắn chat mới vào database. Hỗ trợ lưu cả tin nhắn từ user và AI response, kèm theo ảnh và metadata. Yêu cầu JWT authentication."
+    summary="Save chat message",
+    description="API to save a new chat message to database. Supports saving both user messages and AI responses with images and metadata. Requires JWT authentication."
 )
 async def create_chat_message(
     message_data: ChatMessageCreate,
@@ -36,12 +36,12 @@ async def create_chat_message(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Lưu một tin nhắn chat mới
+    Save a new chat message
     
-    - **message**: Nội dung tin nhắn
-    - **is_user**: True nếu là tin của user, False nếu là AI response
-    - **images**: Array URLs của ảnh đính kèm (optional)
-    - **extra_data**: Thông tin bổ sung như traffic data, intent, etc. (optional)
+    - **message**: Message content
+    - **is_user**: True if user message, False if AI response
+    - **images**: Array of image URLs attached to message (optional)
+    - **extra_data**: Additional information such as traffic data, intent, etc. (optional)
     """
     new_message = ChatMessage(
         user_id=current_user.id,
@@ -61,8 +61,8 @@ async def create_chat_message(
 @router.get(
     "/messages",
     response_model=List[ChatMessageListResponse],
-    summary="Lấy lịch sử chat",
-    description="API lấy lịch sử chat của user hiện tại với phân trang và filter theo thời gian. Trả về danh sách tin nhắn theo thứ tự cũ → mới. Yêu cầu JWT authentication."
+    summary="Get chat history",
+    description="API to get current user's chat history with pagination and time-based filtering. Returns list of messages from old to new order. Requires JWT authentication."
 )
 async def get_chat_history(
     limit: int = Query(default=100, ge=1, le=1000),
@@ -72,13 +72,13 @@ async def get_chat_history(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Lấy lịch sử chat của user hiện tại
+    Get current user's chat history
     
-    - **limit**: Số lượng tin nhắn tối đa (default: 100, max: 1000)
-    - **offset**: Bỏ qua bao nhiêu tin nhắn đầu (pagination)
-    - **since**: Chỉ lấy tin nhắn sau thời điểm này (ISO format)
+    - **limit**: Maximum number of messages (default: 100, max: 1000)
+    - **offset**: Skip how many initial messages (pagination)
+    - **since**: Only get messages after this timestamp (ISO format)
     
-    Returns danh sách tin nhắn theo thứ tự thời gian (cũ → mới)
+    Returns list of messages in time order (old → new)
     """
     query = select(ChatMessage).where(ChatMessage.user_id == current_user.id)
     
@@ -109,15 +109,15 @@ async def get_chat_history(
 @router.delete(
     "/messages",
     status_code=204,
-    summary="Xóa toàn bộ lịch sử chat",
-    description="API xóa tất cả tin nhắn chat của user hiện tại. Không thể hoàn tác sau khi xóa. Yêu cầu JWT authentication."
+    summary="Clear entire chat history",
+    description="API to delete all chat messages of the current user. Cannot be undone after deletion. Requires JWT authentication."
 )
 async def clear_chat_history(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Xóa toàn bộ lịch sử chat của user hiện tại
+    Clear entire chat history of current user
     """
     await db.execute(
         delete(ChatMessage).where(ChatMessage.user_id == current_user.id)
@@ -130,8 +130,8 @@ async def clear_chat_history(
 @router.delete(
     "/messages/{message_id}",
     status_code=204,
-    summary="Xóa một tin nhắn cụ thể",
-    description="API xóa một tin nhắn chat theo ID. User chỉ có thể xóa tin nhắn của chính mình. Yêu cầu JWT authentication."
+    summary="Delete specific message",
+    description="API to delete a chat message by ID. User can only delete their own messages. Requires JWT authentication."
 )
 async def delete_chat_message(
     message_id: int,
@@ -139,9 +139,9 @@ async def delete_chat_message(
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Xóa một tin nhắn cụ thể
+    Delete a specific message
     
-    User chỉ có thể xóa tin nhắn của chính mình
+    User can only delete their own messages
     """
     query = select(ChatMessage).where(
         ChatMessage.id == message_id,
@@ -161,15 +161,15 @@ async def delete_chat_message(
 
 @router.get(
     "/messages/count",
-    summary="Đếm số lượng tin nhắn",
-    description="API trả về tổng số tin nhắn chat của user hiện tại. Yêu cầu JWT authentication."
+    summary="Count number of messages",
+    description="API returns total number of chat messages for current user. Requires JWT authentication."
 )
 async def get_message_count(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
     """
-    Đếm tổng số tin nhắn của user
+    Count total messages for user
     """
     from sqlalchemy import func
     

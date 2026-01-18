@@ -19,9 +19,9 @@ function Login({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
     setLoading(true);
     setError("");
     try {
-      // OAuth2 yêu cầu application/x-www-form-urlencoded
+      // OAuth2 requires application/x-www-form-urlencoded
       const formData = new URLSearchParams();
-      formData.append("username", email); // OAuth2 dùng field "username" cho cả email/username
+      formData.append("username", email); // OAuth2 uses "username" field for both email/username
       formData.append("password", password);
 
       const res = await fetch(authConfig.LOGIN_URL, {
@@ -35,10 +35,10 @@ function Login({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
         onLoginSuccess?.();
         navigate("/home");
       } else {
-        setError(data.detail || "Đăng nhập thất bại!");
+        setError(data.detail || "Login failed!");
       }
     } catch {
-      setError("Có lỗi xảy ra. Vui lòng thử lại.");
+      setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -55,7 +55,7 @@ function Login({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
             Smart Transport
           </CardTitle>
           <p className="text-gray-600 dark:text-gray-300 mt-2">
-            Đăng nhập để tiếp tục
+            Sign in to continue
           </p>
         </CardHeader>
         <CardContent className="px-8 pb-8">
@@ -76,7 +76,7 @@ function Login({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Mật khẩu"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -108,10 +108,10 @@ function Login({ onLoginSuccess }: { onLoginSuccess?: () => void }) {
               {loading ? (
                 <div className="flex items-center justify-center">
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  Đang đăng nhập...
+                  Signing in...
                 </div>
               ) : (
-                "Đăng nhập"
+                "Sign In"
               )}
             </Button>
           </form>

@@ -63,7 +63,7 @@ const VideoMonitor = ({
         status: "unknown",
         color: "gray",
         icon: Clock,
-        text: "Không rõ",
+        text: "Unknown",
       };
 
     // Prefer backend-provided classification when available
@@ -74,21 +74,21 @@ const VideoMonitor = ({
           status: "congested",
           color: "red",
           icon: AlertTriangle,
-          text: densityFromBackend,
+          text: "Congested",
         };
       if (densityFromBackend === "Đông đúc")
         return {
           status: "busy",
           color: "yellow",
           icon: Clock,
-          text: densityFromBackend,
+          text: "Busy",
         };
       if (densityFromBackend === "Thông thoáng")
         return {
           status: "clear",
           color: "green",
           icon: CheckCircle,
-          text: densityFromBackend,
+          text: "Clear",
         };
     }
 
@@ -101,28 +101,28 @@ const VideoMonitor = ({
         status: "congested",
         color: "red",
         icon: AlertTriangle,
-        text: "Tắc nghẽn",
+        text: "Congested",
       };
     if (totalVehicles > threshold.c1)
-      return { status: "busy", color: "yellow", icon: Clock, text: "Đông đúc" };
+      return { status: "busy", color: "yellow", icon: Clock, text: "Busy" };
     return {
       status: "clear",
       color: "green",
       icon: CheckCircle,
-      text: "Thông thoáng",
+      text: "Clear",
     };
   };
 
   const getSpeedStatus = (roadName: string) => {
     const data = trafficData[roadName];
-    if (!data) return { speedText: "Không rõ", speedColor: "gray" };
+    if (!data) return { speedText: "Unknown", speedColor: "gray" };
 
     const speedFromBackend = (data as any)?.speed_status;
     if (speedFromBackend) {
       if (speedFromBackend === "Nhanh chóng")
-        return { speedText: "Nhanh chóng", speedColor: "green" };
+        return { speedText: "Fast", speedColor: "green" };
       if (speedFromBackend === "Chậm chạp")
-        return { speedText: "Chậm chạp", speedColor: "orange" };
+        return { speedText: "Slow", speedColor: "orange" };
     }
 
     // Fallback
@@ -130,8 +130,8 @@ const VideoMonitor = ({
     const avgSpeed = (data.speed_car + data.speed_motor) / 2;
 
     if (avgSpeed >= threshold.v)
-      return { speedText: "Nhanh chóng", speedColor: "green" };
-    return { speedText: "Chậm chạp", speedColor: "orange" };
+      return { speedText: "Fast", speedColor: "green" };
+    return { speedText: "Slow", speedColor: "orange" };
   };
 
   const getStatusBadgeVariant = (color: string) => {
@@ -153,7 +153,7 @@ const VideoMonitor = ({
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
             <Video className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="text-sm sm:text-base">Giám Sát Video</span>
+            <span className="text-sm sm:text-base">Traffic Camera</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -183,7 +183,7 @@ const VideoMonitor = ({
         <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center space-x-2">
             <Video className="h-4 w-4 sm:h-5 sm:w-5" />
-            <span className="text-sm sm:text-base">Camera Giao Thông</span>
+            <span className="text-sm sm:text-base">Traffic Camera</span>
           </CardTitle>
           {/* Connection Status */}
           {Object.keys(frameData).length > 0 && (
@@ -198,14 +198,14 @@ const VideoMonitor = ({
                 <>
                   <Wifi className="h-3 w-3 sm:h-4 sm:w-4" />
                   <span>
-                    Đang kết nối với {Object.keys(trafficData).length}/
-                    {allowedRoads.length} camera
+                    Connected to {Object.keys(trafficData).length}/
+                    {allowedRoads.length} cameras
                   </span>
                 </>
               ) : (
                 <>
                   <WifiOff className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span>Đang kết nối...</span>
+                  <span>Connecting...</span>
                 </>
               )}
             </div>
@@ -267,7 +267,7 @@ const VideoMonitor = ({
                     {/* Click to expand hint */}
                     <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
                       <div className="bg-white/90 dark:bg-gray-900/90 text-gray-900 dark:text-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg text-xs sm:text-sm font-medium backdrop-blur-sm">
-                        Click để phóng to
+                        Click to expand
                       </div>
                     </div>
                   </div>
@@ -280,7 +280,7 @@ const VideoMonitor = ({
 
                     {/* Status Badges */}
                     <div className="mb-2 sm:mb-3 flex flex-wrap gap-1.5 sm:gap-2">
-                      {/* Mật độ Badge */}
+                      {/* Density Badge */}
                       <Badge
                         variant={getStatusBadgeVariant(color)}
                         className="flex items-center space-x-1 text-xs"
@@ -289,7 +289,7 @@ const VideoMonitor = ({
                         <span>{text}</span>
                       </Badge>
 
-                      {/* Tốc độ Badge */}
+                      {/* Speed Badge */}
                       {data && (
                         <Badge
                           variant={
@@ -316,7 +316,7 @@ const VideoMonitor = ({
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Ô tô
+                              Cars
                             </p>
                             <p className="font-semibold text-xs sm:text-base text-gray-900 dark:text-white">
                               {data.count_car}
@@ -334,7 +334,7 @@ const VideoMonitor = ({
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300">
-                              Xe máy
+                              Motorcycles
                             </p>
                             <p className="font-semibold text-xs sm:text-base text-gray-900 dark:text-white">
                               {data.count_motor}
@@ -350,7 +350,7 @@ const VideoMonitor = ({
                         <div className="text-center">
                           <Gauge className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400 mx-auto mb-1 sm:mb-2" />
                           <p className="text-xs sm:text-sm text-gray-500">
-                            Đang tải dữ liệu...
+                            Loading data...
                           </p>
                         </div>
                       </div>

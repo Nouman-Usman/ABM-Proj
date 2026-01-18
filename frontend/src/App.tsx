@@ -128,7 +128,7 @@ function AppContent() {
           <a
             href="/home"
             className="flex items-center flex-shrink-0"
-            title="Trang chủ"
+            title="Home"
           >
             <div className="relative w-12 h-12">
               {/* Animated background gradient */}
@@ -171,7 +171,7 @@ function AppContent() {
               }
             >
               <Home className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="hidden sm:inline">Trang Chủ</span>
+              <span className="hidden sm:inline">Home</span>
             </NavLink>
             <NavLink
               to="/analys"
@@ -184,7 +184,7 @@ function AppContent() {
               }
             >
               <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="hidden sm:inline">Phân Tích</span>
+              <span className="hidden sm:inline">Analytics</span>
             </NavLink>
             <NavLink
               to="/chat"
@@ -197,7 +197,7 @@ function AppContent() {
               }
             >
               <Bot className="h-5 w-5 sm:h-6 sm:w-6" />
-              <span className="hidden sm:inline">Trợ Lý AI</span>
+              <span className="hidden sm:inline">AI Assistant</span>
             </NavLink>
           </nav>
         </div>
@@ -225,7 +225,7 @@ function AppContent() {
               >
                 <UserCircle className="h-6 w-6 sm:h-7 sm:w-7 text-gray-700 dark:text-blue-400" />
                 <span className="font-bold text-gray-800 dark:text-gray-200 hidden sm:inline text-sm">
-                  Tài khoản
+                  Account
                 </span>
               </button>
               <div
@@ -253,7 +253,7 @@ function AppContent() {
                     onClick={() => setShowUserDropdown(false)}
                   >
                     <ShieldCheck className="h-4 w-4 mr-3 text-green-600 dark:text-green-400" />
-                    Trang Admin
+                    Admin Panel
                   </a>
                 )}
                 <a
@@ -262,7 +262,7 @@ function AppContent() {
                   onClick={() => setShowUserDropdown(false)}
                 >
                   <Settings className="h-4 w-4 mr-3 text-purple-600 dark:text-blue-400" />{" "}
-                  Quản lý tài khoản
+                  Settings
                 </a>
                 <button
                   className="w-full flex items-center px-4 py-2.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 text-sm transition-all"
@@ -272,7 +272,7 @@ function AppContent() {
                   }}
                   type="button"
                 >
-                  <LogOut className="h-4 w-4 mr-3" /> Đăng xuất
+                  <LogOut className="h-4 w-4 mr-3" /> Sign Out
                 </button>
               </div>
             </>
@@ -283,7 +283,7 @@ function AppContent() {
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="h-10 w-10 rounded-lg bg-gradient-to-br from-amber-100 to-yellow-100 dark:from-gray-800 dark:to-gray-700 border-amber-300 dark:border-gray-700 hover:from-amber-200 hover:to-yellow-200 dark:hover:from-gray-700 dark:hover:to-gray-600 shadow-sm"
-            title={theme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
+            title={theme === "dark" ? "Light Mode" : "Dark Mode"}
           >
             {theme === "dark" ? (
               <Sun className="h-4 w-4 text-amber-600" />

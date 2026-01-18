@@ -53,7 +53,7 @@ const TrafficAnalytics: React.FC<Props> = ({
     if (Object.keys(trafficData).length === 0) return;
 
     const now = new Date();
-    const timeString = now.toLocaleTimeString("vi-VN", {
+    const timeString = now.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
@@ -141,7 +141,7 @@ const TrafficAnalytics: React.FC<Props> = ({
         {message}
       </p>
       <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">
-        Dữ liệu sẽ xuất hiện khi hệ thống bắt đầu thu thập
+        Data will appear when the system begins collecting
       </p>
     </div>
   );
@@ -157,24 +157,24 @@ const TrafficAnalytics: React.FC<Props> = ({
             className="flex items-center space-x-2 text-xs sm:text-sm"
           >
             <BarChart3 className="h-4 w-4" />
-            <span className="hidden sm:inline">Tổng quan</span>
-            <span className="sm:hidden">Tổng</span>
+            <span className="hidden sm:inline">Overview</span>
+            <span className="sm:hidden">Overview</span>
           </TabsTrigger>
           <TabsTrigger
             value="trends"
             className="flex items-center space-x-2 text-xs sm:text-sm"
           >
             <LineChartIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Xu hướng</span>
-            <span className="sm:hidden">Xu hướng</span>
+            <span className="hidden sm:inline">Trends</span>
+            <span className="sm:hidden">Trends</span>
           </TabsTrigger>
           <TabsTrigger
             value="distribution"
             className="flex items-center space-x-2 text-xs sm:text-sm"
           >
             <PieChartIcon className="h-4 w-4" />
-            <span className="hidden sm:inline">Phân bố</span>
-            <span className="sm:hidden">Phân bố</span>
+            <span className="hidden sm:inline">Distribution</span>
+            <span className="sm:hidden">Distribution</span>
           </TabsTrigger>
         </TabsList>
 
@@ -182,7 +182,7 @@ const TrafficAnalytics: React.FC<Props> = ({
           {!hasData ? (
             <Card className="shadow-lg">
               <CardContent className="pt-6">
-                <EmptyState message="Chưa có dữ liệu giao thông" />
+                <EmptyState message="No traffic data available yet" />
               </CardContent>
             </Card>
           ) : (
@@ -190,7 +190,7 @@ const TrafficAnalytics: React.FC<Props> = ({
               <Card className="shadow-lg">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-base sm:text-lg">
-                    Số lượng xe theo tuyến đường
+                    Vehicle Count by Route
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex justify-center px-2 sm:px-4">
@@ -208,7 +208,7 @@ const TrafficAnalytics: React.FC<Props> = ({
                       <Tooltip
                         formatter={(value, name) => [
                           value,
-                          name === "cars" ? "Ô tô" : "Xe máy",
+                          name === "cars" ? "Cars" : "Motorcycles",
                         ]}
                         labelFormatter={(label) =>
                           vehicleCountData.find((d) => d.road === label)
@@ -240,7 +240,7 @@ const TrafficAnalytics: React.FC<Props> = ({
               <Card className="shadow-lg">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-base sm:text-lg">
-                    Tốc độ trung bình (km/h)
+                    Average Speed (km/h)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="flex justify-center px-2 sm:px-4">
@@ -258,7 +258,7 @@ const TrafficAnalytics: React.FC<Props> = ({
                       <Tooltip
                         formatter={(value, name) => [
                           `${Number(value).toFixed(1)} km/h`,
-                          name === "carSpeed" ? "Ô tô" : "Xe máy",
+                          name === "carSpeed" ? "Cars" : "Motorcycles",
                         ]}
                         labelFormatter={(label) =>
                           speedData.find((d) => d.road === label)?.fullRoad ||
@@ -294,12 +294,12 @@ const TrafficAnalytics: React.FC<Props> = ({
           <Card className="shadow-lg">
             <CardHeader className="pb-4">
               <CardTitle className="text-base sm:text-lg">
-                Xu hướng giao thông theo thời gian
+                Traffic Trends Over Time
               </CardTitle>
             </CardHeader>
             <CardContent className="px-2 sm:px-4">
               {trendsData.length === 0 ? (
-                <EmptyState message="Chưa có dữ liệu lịch sử" />
+                <EmptyState message="No historical data available yet" />
               ) : (
                 <ResponsiveContainer width="100%" height={400}>
                   <LineChart data={trendsData}>
@@ -337,12 +337,12 @@ const TrafficAnalytics: React.FC<Props> = ({
           <Card className="shadow-lg">
             <CardHeader className="pb-4">
               <CardTitle className="text-base sm:text-lg">
-                Phân bố xe theo tuyến đường
+                Vehicle Distribution by Route
               </CardTitle>
             </CardHeader>
             <CardContent className="px-2 sm:px-4">
               {pieData.length === 0 ? (
-                <EmptyState message="Chưa có dữ liệu phân bố" />
+                <EmptyState message="No distribution data available yet" />
               ) : (
                 <ResponsiveContainer width="100%" height={400}>
                   <PieChart>
@@ -367,8 +367,8 @@ const TrafficAnalytics: React.FC<Props> = ({
                     </Pie>
                     <Tooltip
                       formatter={(value, _, props) => [
-                        `${value} xe (${props.payload.cars} ô tô, ${props.payload.motors} xe máy)`,
-                        "Tổng số xe",
+                        `${value} vehicles (${props.payload.cars} cars, ${props.payload.motors} motorcycles)`,
+                        "Total Vehicles",
                       ]}
                       contentStyle={{
                         backgroundColor: "rgba(255,255,255,0.95)",

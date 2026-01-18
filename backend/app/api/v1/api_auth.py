@@ -2,20 +2,20 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm  
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from models.user import User
-from schemas.user import UserCreate, UserUpdate, UserOut
-from core.security import hash_password, verify_password
-from db.base import get_db
-from utils.jwt_handler import create_access_token, get_current_user
-from core.config import settings_server
+from ...models.user import User
+from ...schemas.user import UserCreate, UserUpdate, UserOut
+from ...core.security import hash_password, verify_password
+from ...db.base import get_db
+from ...utils.jwt_handler import create_access_token, get_current_user
+from ...core.config import settings_server
 from sqlalchemy.exc import IntegrityError
 
 router = APIRouter(prefix="/auth")
 
 @router.post(
     path= "/register",
-    summary="Đăng ký tài khoản mới",
-    description="API đăng ký user mới với thông tin username, password, email và phone_number. Username, email và số điện thoại phải là duy nhất trong hệ thống.",
+    summary="Register new account",
+    description="API to register new user with username, password, email and phone_number. Username, email and phone number must be unique in the system.",
     status_code=201
 )
 async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
@@ -28,15 +28,15 @@ async def register(user: UserCreate, db: AsyncSession = Depends(get_db)):
     db.add(new_user)
     try:
         await db.commit()
-        return {"msg": "Đăng ký thành công"}
+        return {"msg": "Registration successful"}
     except IntegrityError:
         await db.rollback()
-        raise HTTPException(status_code=400, detail="Username, email hoặc số điện thoại đã tồn tại!")
+        raise HTTPException(status_code=400, detail="Username, email or phone number already exists!")
 
 @router.post(
     path= "/login",
-    summary="Đăng nhập vào hệ thống",
-    description="API đăng nhập OAuth2 compatible. Sử dụng email cùng với password để lấy access token. Token này dùng để xác thực các request tiếp theo."
+    summary="Login to system",
+    description="OAuth2 compatible login API. Use email with password to get access token. This token is used to authenticate subsequent requests."
 )
 async def login(
     form_data: OAuth2PasswordRequestForm = Depends(), 
@@ -59,7 +59,7 @@ async def login(
     if not user_db or not verify_password(form_data.password, user_db.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Sai thông tin đăng nhập",
+            detail="Invalid login credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -97,9 +97,9 @@ async def login(
 @router.get(
     path= "/me",
     response_model=UserOut,
-    summary="Lấy thông tin user hiện tại",
-    description="API trả về thông tin chi tiết của user đang đăng nhập. Yêu cầu JWT authentication."
+    summary="Get current user information",
+    description="API returns detailed information of logged-in user. Requires JWT authentication."
 )
 async def get_current_user_info(current_user: User = Depends(get_current_user)):
-    """Lấy thông tin user hiện tại"""
+    """Get current user information"""
     return current_user

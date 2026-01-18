@@ -67,16 +67,16 @@ export default function AdminPage() {
       if (res.ok) {
         const data = (await res.json()) as Metrics;
         setMetrics(data);
-        setLastUpdate(new Date().toLocaleTimeString("vi-VN"));
+        setLastUpdate(new Date().toLocaleTimeString("en-US"));
       } else if (res.status === 403) {
-        setError("Chỉ admin mới được phép truy cập");
+        setError("Only admins are allowed to access");
       } else if (res.status === 401) {
-        setError("Vui lòng đăng nhập lại");
+        setError("Please log in again");
       } else {
-        setError("Không thể tải dữ liệu hệ thống");
+        setError("Failed to load system data");
       }
     } catch {
-      setError("Lỗi kết nối tới server");
+      setError("Connection error with server");
     }
   };
   // Verify admin role before loading content
@@ -86,7 +86,7 @@ export default function AdminPage() {
       try {
         if (!token) {
           setIsAdmin(false);
-          setError("Chưa đăng nhập");
+          setError("Not logged in");
           setLoading(false);
           return;
         }
@@ -98,8 +98,8 @@ export default function AdminPage() {
           setIsAdmin(false);
           setError(
             res.status === 401
-              ? "Không có quyền truy cập"
-              : "Không thể xác thực người dùng"
+              ? "Access denied"
+              : "Failed to authenticate user"
           );
           setLoading(false);
           return;
@@ -109,12 +109,12 @@ export default function AdminPage() {
           const admin = me?.role_id === 0;
           setIsAdmin(admin);
           if (!admin) {
-            setError("Bạn không có quyền truy cập trang này");
+            setError("You don't have permission to access this page");
           }
         }
       } catch {
         setIsAdmin(false);
-        setError("Lỗi kết nối tới server");
+        setError("Connection error with server");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -144,7 +144,7 @@ export default function AdminPage() {
       setMetrics(m);
       // Append to history
       const point = {
-        time: new Date().toLocaleTimeString("vi-VN", {
+        time: new Date().toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
@@ -154,7 +154,7 @@ export default function AdminPage() {
         disk: Number(m.disk?.percent || 0),
       };
       setHistory((prev) => [...prev, point].slice(-60));
-      setLastUpdate(new Date().toLocaleTimeString("vi-VN"));
+      setLastUpdate(new Date().toLocaleTimeString("en-US"));
     }
   }, [wsData]);
 
@@ -164,7 +164,7 @@ export default function AdminPage() {
     setHistory((prev) => {
       if (prev.length > 0) return prev;
       const point = {
-        time: new Date().toLocaleTimeString("vi-VN", {
+        time: new Date().toLocaleTimeString("en-US", {
           hour: "2-digit",
           minute: "2-digit",
           second: "2-digit",
@@ -180,7 +180,7 @@ export default function AdminPage() {
   if (loading) {
     return (
       <div className="p-6">
-        <p>Đang tải...</p>
+        <p>Loading...</p>
       </div>
     );
   }
@@ -190,13 +190,13 @@ export default function AdminPage() {
       <div className="p-6">
         <Card className="max-w-xl">
           <CardHeader>
-            <CardTitle>Truy cập bị từ chối</CardTitle>
+            <CardTitle>Access Denied</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              {error || "Bạn không có quyền truy cập trang admin."}
+              {error || "You don't have permission to access the admin page."}
             </p>
-            <Button onClick={() => navigate("/home")}>Về trang chủ</Button>
+            <Button onClick={() => navigate("/home")}>Back to Home</Button>
           </CardContent>
         </Card>
       </div>
@@ -206,14 +206,14 @@ export default function AdminPage() {
   return (
     <div className="p-4 sm:p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Bảng điều khiển hệ thống</h2>
+        <h2 className="text-2xl font-bold">System Control Panel</h2>
         <div className="flex items-center gap-3">
           <div className="text-sm text-gray-500">
             WebSocket:{" "}
             {isConnected ? (
-              <span className="text-green-600">Đã kết nối</span>
+              <span className="text-green-600">Connected</span>
             ) : (
-              <span className="text-red-600">Mất kết nối</span>
+              <span className="text-red-600">Disconnected</span>
             )}
           </div>
           <Button variant="ghost" onClick={() => fetchMetrics()}>
@@ -279,9 +279,9 @@ export default function AdminPage() {
       {/* chart */}
       <Card>
         <CardHeader>
-          <CardTitle>Hiệu suất theo thời gian</CardTitle>
+          <CardTitle>Performance Over Time</CardTitle>
           <div className="text-sm text-gray-500">
-            {lastUpdate ? `Cập nhật: ${lastUpdate}` : "Chưa có dữ liệu"}
+            {lastUpdate ? `Last Update: ${lastUpdate}` : "No data available"}
           </div>
         </CardHeader>
         <CardContent className="px-2 sm:px-4">
@@ -336,7 +336,7 @@ export default function AdminPage() {
       {metrics?.error && (
         <Card className="border-red-300">
           <CardHeader>
-            <CardTitle className="text-red-600">Cảnh báo</CardTitle>
+            <CardTitle className="text-red-600">Alerts</CardTitle>
           </CardHeader>
           <CardContent>
             <p>{metrics.error}</p>

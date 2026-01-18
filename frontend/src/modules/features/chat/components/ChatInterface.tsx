@@ -53,13 +53,13 @@ const ChatImageFromUrl = ({ url }: { url: string }) => {
     // eslint-disable-next-line
   }, [url]);
   if (error)
-    return <div className="text-xs text-red-500">Không thể tải ảnh</div>;
+    return <div className="text-xs text-red-500">Unable to load image</div>;
   if (!blobUrl)
     return <div className="w-32 h-24 bg-gray-200 animate-pulse rounded" />;
   return (
     <img
       src={blobUrl}
-      alt="Ảnh chat"
+      alt="Chat image"
       className="w-full h-full rounded shadow border border-gray-200 dark:border-gray-700 object-contain"
       style={{ width: "100%", height: "100%" }}
     />
@@ -189,7 +189,7 @@ interface ChatInterfaceProps {
   trafficData: TrafficData;
 }
 
-// Memoized MessageBubble component để tránh re-render không cần thiết
+// Memoized MessageBubble component to avoid unnecessary re-renders
 const MessageBubble = memo(
   ({
     msg,
@@ -238,7 +238,7 @@ const MessageBubble = memo(
               )}
             </Avatar>
             <span className="text-xs text-gray-500 dark:text-gray-400">
-              {msg.user ? "Bạn" : "AI"}
+              {msg.user ? "You" : "AI"}
             </span>
             <span className="text-xs text-gray-400 ml-2">{msg.time}</span>
             {msg.typing && (
@@ -253,7 +253,7 @@ const MessageBubble = memo(
                   type="button"
                   className="w-full sm:max-w-[520px] h-auto hover:opacity-90 transition"
                   onClick={() => onPreviewImage(imgUrl)}
-                  title="Xem ảnh lớn"
+                  title="View full image"
                 >
                   <ChatImageFromUrl url={imgUrl} />
                 </button>
@@ -274,7 +274,7 @@ const MessageBubble = memo(
               variant="ghost"
               size="icon"
               onClick={() => onCopyMessage(msg.text, msg.id)}
-              title="Sao chép nội dung"
+              title="Copy content"
               className="p-1"
             >
               {copiedMessageId === msg.id ? (
@@ -285,7 +285,7 @@ const MessageBubble = memo(
             </Button>
             {msg.user && (
               <Badge variant="outline" className="text-xs">
-                Bạn
+                You
               </Badge>
             )}
             {!msg.user && (
@@ -361,9 +361,9 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Hàm scroll xuống cuối
+  // Function to scroll to bottom
   const scrollToBottom = useCallback(() => {
-    // Sử dụng setTimeout để đảm bảo DOM đã update xong
+    // Use setTimeout to ensure DOM has been updated
     setTimeout(() => {
       messagesEndRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -421,7 +421,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
     saveChatDraft(input);
   }, [input]);
 
-  // Kiểm tra trafficData
+  // Check traffic data
   useEffect(() => {
     const hasData = trafficData && Object.keys(trafficData).length > 0;
     console.log("Traffic Data Status:", {
@@ -431,24 +431,24 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
     });
 
     if (!hasData && messages.length === 1) {
-      // Chỉ hiển thị thông báo nếu là tin nhắn chào đầu tiên
+      // Only show message if it's the first greeting message
       setMessages([
         {
           id: "1",
-          text: "Xin chào! Tôi là trợ lý AI của hệ thống giao thông thông minh. Hiện tại hệ thống đang khởi động và thu thập dữ liệu giao thông. Tôi sẽ thông báo ngay khi có thông tin từ các tuyến đường.",
+          text: "Hello! I am an AI assistant for the intelligent traffic monitoring system. The system is currently starting up and collecting traffic data. I will notify you as soon as there is information from the routes.",
           user: false,
-          time: new Date().toLocaleTimeString("vi-VN"),
+          time: new Date().toLocaleTimeString("en-US"),
         },
       ]);
     }
   }, [trafficData, messages.length]);
 
-  // Auto-scroll khi messages thay đổi (gửi tin mới hoặc nhận tin mới)
+  // Auto-scroll when messages change (send new or receive new messages)
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
 
-  // Scroll xuống cuối khi component mount (mở chat lần đầu)
+  // Scroll to bottom when component mounts (first time opening chat)
   useEffect(() => {
     scrollToBottom();
   }, [scrollToBottom]);
@@ -460,7 +460,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
   // Show message if no token
   useEffect(() => {
     if (!token) {
-      toast.error("Vui lòng đăng nhập để sử dụng chat AI");
+      toast.error("Please log in to use AI chat");
     }
   }, [token]);
 
@@ -480,8 +480,8 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
       console.error("WebSocket Error:", wsError);
       // Only show error toast if it's a final error, not retry messages
       if (
-        wsError.includes("Không thể kết nối với server") ||
-        wsError.includes("Lỗi kết nối WebSocket")
+        wsError.includes("Cannot connect to server") ||
+        wsError.includes("WebSocket connection error")
       ) {
         toast.error(wsError);
       }
@@ -492,18 +492,18 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
   useEffect(() => {
     console.log("WebSocket Connection Status:", isWsConnected);
     if (isWsConnected) {
-      toast.success("Đã kết nối với AI thành công!");
+      toast.success("Successfully connected to AI!");
     }
   }, [isWsConnected]);
 
-  // Bỏ phần xử lý/biến đổi câu hỏi - gửi thẳng nội dung người dùng nhập
+  // Send message directly without processing - pass through user input
 
-  // Memoize handlers để tránh re-create functions
+  // Memoize handlers to avoid recreating functions
   const handleSendMessage = useCallback(async () => {
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    console.log("Sending message:", { message: userMessage }); // Log tin nhắn gửi đi
+    console.log("Sending message:", { message: userMessage }); // Log sent message
     setInput("");
     // clear saved draft after sending
     clearChatDraft();
@@ -514,11 +514,11 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
       id: generateMessageId(),
       text: userMessage,
       user: true,
-      time: new Date().toLocaleTimeString("vi-VN"),
+      time: new Date().toLocaleTimeString("en-US"),
     };
     setMessages((prev) => [...prev, userMsg]);
 
-    // Scroll xuống sau khi thêm tin nhắn người dùng
+    // Scroll down after adding user message
     scrollToBottom();
 
     // Add typing indicator
@@ -537,18 +537,18 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
           ...prev.filter((msg) => msg.id !== "typing"),
           {
             id: generateMessageId(),
-            text: "Không thể kết nối tới AI. Vui lòng thử lại sau.",
+            text: "Cannot connect to AI. Please try again later.",
             user: false,
-            time: new Date().toLocaleTimeString("vi-VN"),
+            time: new Date().toLocaleTimeString("en-US"),
           },
         ]);
-        toast.error("Không thể kết nối tới AI");
+        toast.error("Cannot connect to AI");
         setIsLoading(false);
         inputRef.current?.focus();
         return;
       }
 
-      // Gửi thẳng tin nhắn người dùng tới AI
+      // Send message directly to AI
       const ok = chatSocketSend({ message: userMessage });
       console.log("Message sent status:", ok);
 
@@ -557,12 +557,12 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
           ...prev.filter((msg) => msg.id !== "typing"),
           {
             id: generateMessageId(),
-            text: "Không thể gửi tin nhắn tới AI. Vui lòng thử lại.",
+            text: "Cannot send message to AI. Please try again.",
             user: false,
-            time: new Date().toLocaleTimeString("vi-VN"),
+            time: new Date().toLocaleTimeString("en-US"),
           },
         ]);
-        toast.error("Không thể gửi tin nhắn tới AI");
+        toast.error("Cannot send message to AI");
         setIsLoading(false);
         inputRef.current?.focus();
       }
@@ -574,13 +574,13 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
         ...prev.filter((msg) => msg.id !== "typing"),
         {
           id: generateMessageId(),
-          text: "Đã xảy ra lỗi khi gửi tin nhắn. Vui lòng thử lại.",
+          text: "An error occurred while sending the message. Please try again.",
           user: false,
-          time: new Date().toLocaleTimeString("vi-VN"),
+          time: new Date().toLocaleTimeString("en-US"),
         },
       ]);
 
-      toast.error("Không thể kết nối với AI");
+      toast.error("Cannot connect to AI");
       setIsLoading(false);
       inputRef.current?.focus();
     }
@@ -589,7 +589,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
   useEffect(() => {
     if (!chatData) return;
     try {
-      // Log toàn bộ dữ liệu nhận được từ WebSocket
+      // Log all data received from WebSocket
       console.log("WebSocket Raw Response:", chatData);
       const payload = chatData as
         | { message?: string; image?: string[] }
@@ -597,12 +597,12 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
       const responseText = payload?.message;
       const responseImage = payload?.image;
 
-      // Log chi tiết từng phần của response
+      // Log details of each part of response
       console.log("Response Text:", responseText);
       console.log("Response Images:", responseImage);
 
-      // Chỉ bỏ qua nếu cả text và image đều không có hoặc undefined
-      // Chấp nhận empty string vì AI có thể gửi text rỗng kèm ảnh
+      // Skip only if both text and image are missing or undefined
+      // Accept empty string because AI can send empty text with images
       const hasText = responseText !== undefined && responseText !== null;
       const hasImages = responseImage && responseImage.length > 0;
 
@@ -639,7 +639,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
             id: generateMessageId(),
             text: processedText,
             user: false,
-            time: new Date().toLocaleTimeString("vi-VN"),
+            time: new Date().toLocaleTimeString("en-US"),
             image: imageUrls,
           },
         ];
@@ -649,7 +649,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
       // toast.success("Đã nhận được phản hồi từ AI");
     } catch (error) {
       console.error("Error processing WebSocket response:", error);
-      toast.error("Lỗi khi xử lý phản hồi");
+      toast.error("Error processing response");
     }
     setIsLoading(false);
     inputRef.current?.focus();
@@ -669,14 +669,14 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
   const clearChat = useCallback(() => {
     const welcomeMsg: Message = {
       id: "1",
-      text: "Xin chào! Tôi là trợ lý AI của hệ thống giao thông thông minh. Bạn có thể hỏi tôi về tình trạng giao thông hiện tại, thống kê xe cộ, hoặc bất kỳ thông tin nào về các tuyến đường đang được giám sát. Tôi có thể giúp gì cho bạn?",
+      text: "Hello! I am an AI assistant for the intelligent traffic monitoring system. You can ask me about current traffic conditions, vehicle statistics, or any information about monitored routes. How can I help you?",
       user: false,
-      time: new Date().toLocaleTimeString("vi-VN"),
+      time: new Date().toLocaleTimeString("en-US"),
     };
     setMessages([welcomeMsg]);
     // Clear chat history using helper function
     clearChatHistory();
-    toast.success("Đã xóa lịch sử chat");
+    toast.success("Chat history cleared");
   }, []);
 
   const exportHistory = useCallback(() => {
@@ -693,10 +693,10 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      toast.success("Đã xuất lịch sử chat");
+      toast.success("Chat history exported");
     } catch (error) {
       console.error("Export error:", error);
-      toast.error("Không thể xuất lịch sử chat");
+      toast.error("Cannot export chat history");
     }
   }, [messages]);
 
@@ -705,9 +705,9 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
       await navigator.clipboard.writeText(text);
       setCopiedMessageId(messageId);
       setTimeout(() => setCopiedMessageId(null), 1500);
-      toast.success("Đã sao chép nội dung");
+      toast.success("Content copied");
     } catch {
-      toast.error("Không thể sao chép nội dung");
+      toast.error("Cannot copy content");
     }
   }, []);
 
@@ -724,7 +724,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
           variant="ghost"
           size="icon"
           onClick={exportHistory}
-          title="Xuất lịch sử chat"
+          title="Export chat history"
           className="bg-white/90 dark:bg-gray-900/90 hover:bg-blue-50 dark:hover:bg-blue-900/50 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all"
         >
           <Download className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
@@ -733,7 +733,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
           variant="ghost"
           size="icon"
           onClick={clearChat}
-          title="Xóa lịch sử chat"
+          title="Clear chat history"
           className="bg-white/90 dark:bg-gray-900/90 hover:bg-red-50 dark:hover:bg-red-900/50 border border-gray-200 dark:border-gray-700 shadow-md hover:shadow-lg transition-all"
         >
           <Trash2 className="w-4 h-4 sm:w-5 sm:h-5 text-red-500" />
@@ -770,7 +770,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Nhập câu hỏi về giao thông..."
+          placeholder="Ask a question about traffic..."
           className="flex-1 h-11 sm:h-12"
           disabled={isLoading}
         />
@@ -779,7 +779,7 @@ const ChatInterface = ({ trafficData }: ChatInterfaceProps) => {
           variant="default"
           size="icon"
           disabled={isLoading || !input.trim()}
-          title="Gửi"
+          title="Send"
           className="h-11 w-11 sm:h-12 sm:w-12 flex-shrink-0"
         >
           <Send className="w-4 h-4 sm:w-5 sm:h-5" />

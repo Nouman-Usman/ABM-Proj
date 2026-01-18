@@ -12,13 +12,11 @@ lap
 gdown
 git+https://github.com/ultralytics/CLIP.git
 
-# FastAPI and web framework
 fastapi
 uvicorn[standard]
 pydantic
 python-dotenv
 
-# Database and authentication
 sqlalchemy[asyncio]
 asyncpg
 alembic
@@ -34,14 +32,8 @@ langchain
 langchain_google_genai
 langgraph
 
-# Utilities
 overrides
 email-validator
-
-
-# telegram_bot
 python-telegram-bot
-
-# System metrics and testing
 psutil
 pytest

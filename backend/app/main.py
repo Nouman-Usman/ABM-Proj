@@ -2,11 +2,11 @@ import os
 import sys
 import signal
 from fastapi import FastAPI
-from api import v1
+from .api import v1
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import RedirectResponse
-from db.base import create_tables
-from core.config import settings_network
+from .db.base import create_tables
+from .core.config import settings_network
 
 os.environ["OPENCV_VIDEOIO_PRIORITY_MSMF"] = "0"
 os.environ["OPENCV_VIDEOIO_PRIORITY_DSHOW"] = "1"
@@ -19,12 +19,12 @@ app = FastAPI(
     description="""
     Real-time Traffic Monitoring & AI Assistant
     
-    API cung cấp:
-    - Real-time video streaming và phân tích giao thông
-    - AI Chatbot hỗ trợ thông tin giao thông
-    - Analytics và metrics về lưu lượng xe
-    - User authentication và management
-    - Admin tools và system monitoring
+    API provides:
+    - Real-time video streaming and traffic analysis
+    - AI Chatbot to assist with traffic information
+    - Analytics and metrics about vehicle flow
+    - User authentication and management
+    - Admin tools and system monitoring
     
     """,
     version="1.0.0",
@@ -46,8 +46,26 @@ app.add_middleware(
 )
 
 def signal_handler(signum, frame):
-    """Xử lý Ctrl+C"""
-    print("\nĐang shutdown server...")
+    """
+    Signal handler for graceful server shutdown.
+
+    Handles interrupt signals (SIGINT, SIGTERM) by performing cleanup operations
+    before terminating the application.
+
+    Args:
+        signum (int): The signal number that triggered the handler.
+        frame (FrameType): The current stack frame at the time the signal was received.
+
+    Returns:
+        None
+
+    Raises:
+        SystemExit: Exits the process with status code 0 after cleanup.
+
+    Note:
+        This handler ensures that the analyzer's processes are properly cleaned up
+        before the server shuts down to prevent resource leaks or orphaned processes.
+    """
     if v1.state.analyzer:
         v1.state.analyzer.cleanup_processes()
     sys.exit(0)
@@ -58,18 +76,19 @@ signal.signal(signal.SIGTERM, signal_handler)
 
 @app.on_event("startup")
 async def startup_event():
-    """Tạo bảng database khi khởi động"""
+    """Create database tables on startup"""
     print("Creating database tables...")
     try:
         await create_tables()
-        print("Tạo xong bảng database.")
+        print("Database tables created successfully.")
     except Exception as e:
-        print(f"Lỗi tạo bảng database: {e}")
-        raise e
+        print(f"Database table creation error (non-fatal): {e}")
+        print("Server will continue without database - some features may not work.")
+        # Don't raise - allow server to start without DB for development
 
 @app.on_event("shutdown")
 def shutdown():
-    print("Tắt mọi thứ...")
+    print("Shutting down...")
     if v1.state.analyzer:
         v1.state.analyzer.cleanup_processes()
 
@@ -77,7 +96,7 @@ def shutdown():
     path='/',
     tags=["Root"],
     summary="Redirect to Frontend",
-    description="Redirect người dùng đến trang Frontend"
+    description="Redirect user to Frontend page"
 )
 def direct_home():
     return RedirectResponse(url= settings_network.URL_FRONTEND)

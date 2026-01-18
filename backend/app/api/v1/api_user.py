@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from core.security import hash_password, verify_password
-from db.base import get_db
-from models.user import User
-from utils.jwt_handler import get_current_user
+from ...core.security import hash_password, verify_password
+from ...db.base import get_db
+from ...models.user import User
+from ...utils.jwt_handler import get_current_user
 from typing import Optional
 from pydantic import BaseModel
 
@@ -15,8 +15,8 @@ class PasswordUpdateRequest(BaseModel):
 
 @router.put(
     "/password",
-    summary="Thay đổi mật khẩu",
-    description="API cập nhật mật khẩu của user. Yêu cầu xác thực mật khẩu cũ và JWT authentication."
+    summary="Change password",
+    description="API to update user password. Requires old password verification and JWT authentication."
 )
 async def update_password(
     request: PasswordUpdateRequest,
@@ -32,7 +32,7 @@ async def update_password(
     if not verify_password(request.old_password, current_user.password):
         raise HTTPException(
             status_code=400,
-            detail="Mật khẩu hiện tại không đúng!"
+            detail="Current password is incorrect!"
         )
     
     # Hash new password
@@ -43,12 +43,12 @@ async def update_password(
         db_user = db.query(User).filter(User.id == current_user.id).first()
         db_user.password = hashed_password
         db.commit()
-        return {"message": "Cập nhật mật khẩu thành công!"}
+        return {"message": "Password updated successfully!"}
     except Exception as e:
         db.rollback()
         raise HTTPException(
             status_code=500,
-            detail="Đã xảy ra lỗi khi cập nhật mật khẩu. Vui lòng thử lại sau."
+            detail="An error occurred while updating password. Please try again later."
         )
 
 class ProfileUpdateRequest(BaseModel):
@@ -58,8 +58,8 @@ class ProfileUpdateRequest(BaseModel):
 
 @router.put(
     "/profile",
-    summary="Cập nhật thông tin cá nhân",
-    description="API cập nhật profile của user (username, email, phone_number). Username, email và số điện thoại phải là duy nhất. Yêu cầu JWT authentication."
+    summary="Update personal information",
+    description="API to update user profile (username, email, phone_number). Username, email and phone number must be unique. Requires JWT authentication."
 )
 async def update_profile(
     request: ProfileUpdateRequest,
@@ -75,21 +75,21 @@ async def update_profile(
         # Check for unique constraints
         if request.username and request.username != db_user.username:
             if db.query(User).filter(User.username == request.username).first():
-                raise HTTPException(status_code=400, detail="Tên đăng nhập đã tồn tại!")
+                raise HTTPException(status_code=400, detail="Username already exists!")
             db_user.username = request.username
             
         if request.email and request.email != db_user.email:
             if db.query(User).filter(User.email == request.email).first():
-                raise HTTPException(status_code=400, detail="Email đã được sử dụng!")
+                raise HTTPException(status_code=400, detail="Email already in use!")
             db_user.email = request.email
             
         if request.phone_number and request.phone_number != db_user.phone_number:
             if db.query(User).filter(User.phone_number == request.phone_number).first():
-                raise HTTPException(status_code=400, detail="Số điện thoại đã được sử dụng!")
+                raise HTTPException(status_code=400, detail="Phone number already in use!")
             db_user.phone_number = request.phone_number
 
         db.commit()
-        return {"message": "Cập nhật thông tin thành công!"}
+        return {"message": "Profile updated successfully!"}
     except HTTPException:
         db.rollback()
         raise
@@ -97,5 +97,5 @@ async def update_profile(
         db.rollback()
         raise HTTPException(
             status_code=500, 
-            detail="Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại sau."
+            detail="An error occurred while updating information. Please try again later."
         )

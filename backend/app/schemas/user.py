@@ -25,4 +25,4 @@ class UserOut(BaseUser):
     role_id: int
 
     class Config:
-        from_attributes = True # chuyển từ orm mode sang from_attributes
+        from_attributes = True # convert from orm mode to from_attributes

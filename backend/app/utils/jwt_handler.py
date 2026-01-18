@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
 from jose import jwt
-from core.config import settings_server
+from ..core.config import settings_server
 from fastapi import Depends, HTTPException, status, Request, WebSocket
 from fastapi.security import OAuth2PasswordBearer
-from models.user import User
-from db.base import get_db
+from ..models.user import User
+from ..db.base import get_db, get_db_for_ws
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional, Union
@@ -14,40 +14,40 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")
 
 def extract_token(source: Union[Request, WebSocket]) -> Optional[str]:
     """
-    Extract token từ Request hoặc WebSocket.
-    Hỗ trợ: Authorization header, Cookie, Query params
+    Extract token from Request or WebSocket.
+    Supports: Authorization header, Cookie, Query params
     
     Args:
-        source: Request hoặc WebSocket object
+        source: Request or WebSocket object
         
     Returns:
-        Token string nếu tìm thấy, None nếu không
+        Token string if found, None otherwise
     """
     if not source:
         return None
     
     token = None
     
-    # 1. Thử lấy từ Authorization header
+    # 1. Try to get from Authorization header
     auth_header = source.headers.get("authorization")
     if auth_header and auth_header.lower().startswith("bearer "):
         token = auth_header.split(" ", 1)[1]
     
-    # 2. Thử lấy từ cookie
+    # 2. Try to get from cookie
     if not token:
         token = source.cookies.get("access_token")
     
-    # 3. Thử lấy từ query params
+    # 3. Try to get from query params
     if not token:
         token = source.query_params.get("token")
     
     return token
 
 def create_access_token(data: dict):
-    """ Tạo JWT access token từ dữ liệu đầu vào.
+    """ Create JWT access token from input data.
 
     Args:
-        data (dict): Dữ liệu đầu vào để tạo token.
+        data (dict): Input data to create token.
 
     Returns:
         str: JWT access token.
@@ -58,13 +58,13 @@ def create_access_token(data: dict):
     return jwt.encode(to_encode, settings_server.JWT_SECRET, algorithm=settings_server.JWT_ALGORITHM)
 
 def decode_access_token(token: str) -> dict|None:
-    """Giải mã token JWT.
+    """Decode JWT token.
 
     Args:
-        token (str): token cần giải mã.
+        token (str): token to decode.
 
     Returns:
-        dict|None: thông tin của token nếu hợp lệ, ngược lại trả về None.
+        dict|None: token information if valid, otherwise returns None.
     """
     try:
         payload = jwt.decode(token, settings_server.JWT_SECRET, algorithms=[settings_server.JWT_ALGORITHM])
@@ -77,15 +77,15 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db)
 ) -> User:
     """
-    HTTP-only dependency: xác thực qua OAuth2 Bearer token trong Authorization header.
-    - Không fallback cookie hoặc query params cho HTTP endpoints.
-    - Trả về 401 nếu không có hoặc token không hợp lệ.
+    HTTP-only dependency: authenticate via OAuth2 Bearer token in Authorization header.
+    - No fallback to cookie or query params for HTTP endpoints.
+    - Returns 401 if missing or token is invalid.
     """
-    # Yêu cầu bắt buộc Bearer token trong Authorization header
+    # Require Bearer token in Authorization header
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token không hợp lệ hoặc không tồn tại.",
+            detail="Invalid or missing token.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     
@@ -93,7 +93,7 @@ async def get_current_user(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token không hợp lệ hoặc user không tồn tại.",
+            detail="Invalid token or user does not exist.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
@@ -103,24 +103,24 @@ async def get_current_user(
 #     db: AsyncSession = Depends(get_db)
 # ) -> User:
 #     """
-#     HTTP dependency linh hoạt: chấp nhận token từ nhiều nguồn.
+#     HTTP dependency flexible: accept token from multiple sources.
     
-#     Thứ tự ưu tiên:
+#     Priority order:
 #     1. Authorization header (Bearer token)
 #     2. Cookie (access_token)
 #     3. Query parameter (?token=...)
     
-#     ⚠️ LƯU Ý BẢO MẬT:
-#     - Query params có thể bị ghi log vào server/proxy logs → rủi ro lộ token
-#     - Cookies yêu cầu cấu hình CORS/SameSite đúng
-#     - Authorization header là phương thức an toàn nhất cho API
+#     ⚠️ SECURITY WARNING:
+#     - Query params can be logged in server/proxy logs → token leakage risk
+#     - Cookies require proper CORS/SameSite configuration
+#     - Authorization header is the safest method for APIs
     
-#     Sử dụng khi:
-#     - Cần hỗ trợ nhiều client types (browser, mobile, desktop)
-#     - Frontend không thể đặt Authorization header dễ dàng
-#     - Cần backward compatibility với legacy systems
+#     Use when:
+#     - Need to support multiple client types (browser, mobile, desktop)
+#     - Frontend cannot easily set Authorization header
+#     - Need backward compatibility with legacy systems
     
-#     Ví dụ sử dụng:
+#     Example usage:
 #     ```python
 #     @router.get("/profile")
 #     async def get_profile(user: User = Depends(get_current_user_flexible)):
@@ -135,14 +135,14 @@ async def get_current_user(
 #         User: Authenticated user object
         
 #     Raises:
-#         HTTPException: 401 nếu token không tồn tại hoặc không hợp lệ
+#         HTTPException: 401 if token does not exist or is invalid
 #     """
 #     token = extract_token(request)
     
 #     if not token:
 #         raise HTTPException(
 #             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Token không hợp lệ hoặc không tồn tại. Vui lòng cung cấp token qua Authorization header, cookie hoặc query parameter.",
+#             detail="Invalid or missing token. Please provide token via Authorization header, cookie, or query parameter.",
 #             headers={"WWW-Authenticate": "Bearer"},
 #         )
     
@@ -150,46 +150,47 @@ async def get_current_user(
 #     if not user:
 #         raise HTTPException(
 #             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Token không hợp lệ hoặc user không tồn tại.",
+#             detail="Invalid token or user does not exist.",
 #             headers={"WWW-Authenticate": "Bearer"},
 #         )
 #     return user
 
 async def get_current_user_ws(
     websocket: WebSocket,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_for_ws)
 ) -> User:
     """
-    WebSocket-only dependency: lấy token linh hoạt từ header/cookie/query params.
-    - Dùng cho browser WebSocket không thể set Authorization header.
-    - Chấp nhận các nguồn: Authorization header (Bearer), cookie access_token, query param ?token=...
-    - Trả về 401 nếu không có hoặc token không hợp lệ.
+    WebSocket-only dependency: get token flexibly from header/cookie/query params.
+    - For browser WebSocket that cannot set Authorization header.
+    - Accept from multiple sources: Authorization header (Bearer), cookie access_token, query param ?token=...
+    - Uses dedicated WebSocket session for better connection pool management
+    - Returns 401 if missing or token is invalid.
     """
     token = extract_token(websocket)
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token không hợp lệ hoặc không tồn tại.",
+            detail="Invalid or missing token.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     user = await get_user_by_token(token, db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token không hợp lệ hoặc user không tồn tại.",
+            detail="Invalid token or user does not exist.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user
 
 async def get_user_by_token(token: str, db: AsyncSession) -> Optional[User]:
-    """Hàm dùng cho websocket hoặc các trường hợp cần truyền token/db trực tiếp
+    """Function for WebSocket or cases requiring direct token/db transfer
 
     Args:
-        token (str): token JWT cần xác thực
-        db (AsyncSession): phiên làm việc với cơ sở dữ liệu
+        token (str): JWT token to authenticate
+        db (AsyncSession): database session
 
     Returns:
-        Optional[User]: người dùng tương ứng với token nếu hợp lệ, ngược lại trả về None
+        Optional[User]: user corresponding to the token if valid, otherwise returns None
     """
     payload = decode_access_token(token)
     if payload is None:

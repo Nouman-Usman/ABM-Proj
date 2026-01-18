@@ -32,8 +32,8 @@ export default function LoginPage({
           onClick={() => setShowRegister(!showRegister)}
         >
           {showRegister
-            ? "Đã có tài khoản? Đăng nhập"
-            : "Chưa có tài khoản? Đăng ký"}
+            ? "Already have an account? Sign In"
+            : "Don't have an account? Sign Up"}
         </button>
       </div>
     </div>

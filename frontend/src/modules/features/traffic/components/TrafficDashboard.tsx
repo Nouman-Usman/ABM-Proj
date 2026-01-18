@@ -35,7 +35,7 @@ type TrafficBackendData = VehicleData & {
 
 const TrafficDashboard = () => {
   const [selectedRoad, setSelectedRoad] = useState<string | null>(null);
-  const [qrError, setQrError] = useState(false); // QR load fallback
+
   const [localFullscreen] = useState(false);
 
   const [allowedRoads, setAllowedRoads] = useState<string[]>([]);
@@ -43,7 +43,7 @@ const TrafficDashboard = () => {
   useEffect(() => {
     const fetchRoads = async () => {
       try {
-        // roads_name endpoint không cần authentication
+        // roads_name endpoint doesn't require authentication
         const res = await fetch(endpoints.roadNames);
         if (!res.ok) {
           console.error("Failed to fetch road names");
@@ -103,48 +103,48 @@ const TrafficDashboard = () => {
 
   const getSpeedStatus = (roadName: string) => {
     const data = trafficData[roadName] as VehicleData | undefined;
-    if (!data) return { speedText: "Không rõ", speedColor: "gray" };
+    if (!data) return { speedText: "Unknown", speedColor: "gray" };
     const speedFromBackend = (data as TrafficBackendData).speed_status;
     if (speedFromBackend) {
       if (speedFromBackend === "Nhanh chóng")
-        return { speedText: "Nhanh chóng", speedColor: "green" };
+        return { speedText: "Fast", speedColor: "green" };
       if (speedFromBackend === "Chậm chạp")
-        return { speedText: "Chậm chạp", speedColor: "orange" };
+        return { speedText: "Slow", speedColor: "orange" };
     }
     // Fallback: compute from local thresholds
     const threshold = getThresholdForRoad(roadName);
     const avgSpeed = ((data.speed_car ?? 0) + (data.speed_motor ?? 0)) / 2;
     if (avgSpeed >= threshold.v)
-      return { speedText: "Nhanh chóng", speedColor: "green" };
-    return { speedText: "Chậm chạp", speedColor: "orange" };
+      return { speedText: "Fast", speedColor: "green" };
+    return { speedText: "Slow", speedColor: "orange" };
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
       case "congested":
-        return "Tắc nghẽn";
+        return "Congested";
       case "busy":
-        return "Đông đúc";
+        return "Busy";
       case "clear":
-        return "Thông thoáng";
+        return "Clear";
       default:
-        return "Không rõ";
+        return "Unknown";
     }
   };
 
   return (
-    <div className="min-h-screen pt-4 px-2 sm:px-4 space-y-4 sm:space-y-6">
+    <div className="min-h-screen pt-3 px-2 sm:px-4 md:px-6 lg:px-8 space-y-4 sm:space-y-6 pb-6">
       {/* Connection Status Banner - REMOVED, now inside VideoMonitor */}
 
       {/* Main Content */}
       <div className="space-y-4 sm:space-y-6">
         <div
-          className={`grid gap-4 sm:gap-6 ${
-            localFullscreen ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-4"
+          className={`grid gap-3 sm:gap-4 md:gap-6 ${
+            localFullscreen ? "grid-cols-1" : "grid-cols-1 md:grid-cols-3 lg:grid-cols-4"
           }`}
         >
           {/* Video Monitoring */}
-          <div className={localFullscreen ? "col-span-1" : "col-span-3"}>
+          <div className={localFullscreen ? "col-span-1" : "col-span-1 md:col-span-2 lg:col-span-3"}>
             <VideoMonitor
               frameData={frames}
               trafficData={trafficData}
@@ -158,34 +158,34 @@ const TrafficDashboard = () => {
 
           {/* Traffic Status Cards */}
           {!localFullscreen && (
-            <div className="space-y-4 w-full lg:max-w-xs lg:justify-self-end">
-              <Card className="shadow-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900">
-                <CardHeader className="py-2 bg-transparent border-b border-gray-200 dark:border-gray-700">
-                  <CardTitle className="flex items-center space-x-2 text-base text-gray-900 dark:text-white">
-                    <MapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    <span>Tình Trạng Giao Thông</span>
+            <div className="space-y-4 w-full lg:col-span-1">
+              <Card className="shadow-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 h-full">
+                <CardHeader className="py-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-b border-gray-200 dark:border-gray-700 rounded-t-lg sticky top-0 z-10">
+                  <CardTitle className="flex items-center space-x-2 text-sm sm:text-base text-gray-900 dark:text-white font-semibold">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+                    <span className="truncate">Traffic Status</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 px-4 max-h-60 overflow-y-auto overscroll-contain">
+                <CardContent className="space-y-2 sm:space-y-3 px-3 sm:px-4 py-3 sm:py-4 max-h-[calc(100vh-300px)] overflow-y-auto overscroll-contain">
                   {loading ? (
                     // Loading skeleton
                     <>
                       {[1, 2, 3, 4, 5].map((i) => (
                         <div
                           key={i}
-                          className="flex items-center justify-between p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
+                          className="flex items-center justify-between p-2 sm:p-3 rounded-lg bg-gray-50 dark:bg-gray-800"
                         >
-                          <Skeleton className="h-5 w-32" />
-                          <Skeleton className="h-6 w-20" />
+                          <Skeleton className="h-4 w-24 sm:h-5 sm:w-32" />
+                          <Skeleton className="h-5 w-16 sm:h-6 sm:w-20" />
                         </div>
                       ))}
                     </>
                   ) : allowedRoads.length === 0 ? (
                     // Empty state
                     <div className="text-center py-8">
-                      <Clock className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-500 dark:text-gray-400 text-sm">
-                        Không có tuyến đường nào
+                      <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
+                        No Routes Available
                       </p>
                     </div>
                   ) : (
@@ -205,7 +205,7 @@ const TrafficDashboard = () => {
                             className="flex flex-col p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 hover:bg-slate-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-600 transition-all cursor-pointer hover:shadow-lg space-y-2"
                             onClick={() => setSelectedRoad(road)}
                           >
-                            {/* Tên đường và nhãn mật độ */}
+                            {/* Route name and density label */}
                             <div className="flex items-center justify-between">
                               <span className="font-semibold text-sm text-gray-900 dark:text-white">
                                 {road}
@@ -224,7 +224,7 @@ const TrafficDashboard = () => {
                               </Badge>
                             </div>
 
-                            {/* Thông tin số lượng và tốc độ */}
+                            {/* Vehicle count and speed information */}
                             <div className="flex items-center justify-between gap-2">
                               {data && (
                                 <div className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center space-x-1">
@@ -257,37 +257,7 @@ const TrafficDashboard = () => {
           )}
         </div>
       </div>
-      {/* Floating QR bottom-right */}
-      <a
-        href="https://t.me/Smart_Traffic_System_LVA_bot"
-        target="_blank"
-        rel="noreferrer"
-        className="fixed bottom-4 right-4 z-50 group"
-        title="Mở Telegram: @Smart_Traffic_System_LVA_bot"
-      >
-        <div className="rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/90 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:supports-[backdrop-filter]:bg-gray-900/70 p-2 transition-transform group-hover:scale-[1.02] w-40">
-          <div className="text-center text-xs font-semibold mb-1 text-gray-800 dark:text-gray-200">
-            Bot Telegram
-          </div>
-          {!qrError ? (
-            <img
-              src="/images/bot-qr.png"
-              alt="QR Telegram @Smart_Traffic_System_LVA_bot"
-              className="w-36 h-36 object-contain mx-auto rounded-lg"
-              loading="lazy"
-              onError={() => setQrError(true)}
-            />
-          ) : (
-            <div className="w-36 h-36 flex items-center justify-center text-center text-[11px] font-medium text-gray-600 dark:text-gray-300 select-none">
-              Chưa tìm thấy ảnh QR (đặt file vào
-              <br /> public/images/bot-qr.png)
-            </div>
-          )}
-          <div className="mt-1 text-center text-xs font-medium text-gray-700 dark:text-gray-300">
-            QR: @Smart Traffic System
-          </div>
-        </div>
-      </a>
+
     </div>
   );
 };

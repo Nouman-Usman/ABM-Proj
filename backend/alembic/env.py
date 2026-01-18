@@ -8,11 +8,11 @@ from sqlalchemy import pool
 
 from alembic import context
 
-# Add the app directory to sys.path (vì server chạy từ /app)
+# Add the app directory to sys.path (server runs from /app)
 app_path = str(Path(__file__).resolve().parent.parent / "app")
 sys.path.insert(0, app_path)
 
-# Import models and Base (dùng relative imports như trong main.py)
+# Import models and Base (use relative imports like in main.py)
 from app.db.base import Base
 from app.models.user import User
 from app.models.TokenLLM import TokenLLM

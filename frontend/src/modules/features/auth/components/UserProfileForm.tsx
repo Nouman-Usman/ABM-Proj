@@ -43,7 +43,7 @@ function UserProfile() {
       try {
         const token = localStorage.getItem(authConfig.TOKEN_KEY);
         if (!token) {
-          toast.error("Vui lòng đăng nhập");
+          toast.error("Please log in");
           return;
         }
         const res = await fetch(authConfig.ME_URL, {
@@ -55,10 +55,10 @@ function UserProfile() {
           setEmail(data.email || "");
           setPhone(data.phone_number || "");
         } else {
-          toast.error("Không thể tải thông tin người dùng");
+          toast.error("Failed to load user information");
         }
       } catch {
-        toast.error("Lỗi kết nối");
+        toast.error("Connection error");
       }
     };
     fetchUserData();
@@ -86,14 +86,14 @@ function UserProfile() {
       const data = await res.json();
       if (res.ok) {
         setSuccess(true);
-        toast.success("Cập nhật thông tin thành công!");
+        toast.success("Profile updated successfully!");
       } else {
-        setError(data.detail || "Cập nhật thông tin thất bại!");
-        toast.error(data.detail || "Cập nhật thông tin thất bại!");
+        setError(data.detail || "Failed to update profile!");
+        toast.error(data.detail || "Failed to update profile!");
       }
     } catch {
-      setError("Có lỗi xảy ra. Vui lòng thử lại.");
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+      setError("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -102,8 +102,8 @@ function UserProfile() {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setError("Mật khẩu mới không khớp!");
-      toast.error("Mật khẩu mới không khớp!");
+      setError("New passwords don't match!");
+      toast.error("New passwords don't match!");
       return;
     }
     setLoading(true);
@@ -128,14 +128,14 @@ function UserProfile() {
         setOldPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        toast.success("Cập nhật mật khẩu thành công!");
+        toast.success("Password updated successfully!");
       } else {
-        setError(data.detail || "Cập nhật mật khẩu thất bại!");
-        toast.error(data.detail || "Cập nhật mật khẩu thất bại!");
+        setError(data.detail || "Failed to update password!");
+        toast.error(data.detail || "Failed to update password!");
       }
     } catch {
-      setError("Có lỗi xảy ra. Vui lòng thử lại.");
-      toast.error("Có lỗi xảy ra. Vui lòng thử lại.");
+      setError("An error occurred. Please try again.");
+      toast.error("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -155,7 +155,7 @@ function UserProfile() {
             }`}
           >
             <UserCircle className="w-6 h-6" />
-            <span className="font-medium">Thông tin</span>
+            <span className="font-medium">Profile</span>
           </button>
 
           <button
@@ -167,7 +167,7 @@ function UserProfile() {
             }`}
           >
             <KeyRound className="w-6 h-6" />
-            <span className="font-medium">Mật khẩu</span>
+            <span className="font-medium">Password</span>
           </button>
         </div>
 
@@ -178,13 +178,13 @@ function UserProfile() {
             </div>
             <CardTitle className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               {activeSection === "profile"
-                ? "Thông tin cá nhân"
-                : "Đổi mật khẩu"}
+                ? "Personal Information"
+                : "Change Password"}
             </CardTitle>
             <p className="text-gray-600 dark:text-gray-400 mt-1 text-xs sm:text-sm">
               {activeSection === "profile"
-                ? "Cập nhật thông tin tài khoản"
-                : "Thay đổi mật khẩu đăng nhập"}
+                ? "Update your account information"
+                : "Change your login password"}
             </p>
 
             {/* Mobile tabs */}
@@ -198,7 +198,7 @@ function UserProfile() {
                 }`}
               >
                 <UserCircle className="w-5 h-5" />
-                <span className="text-sm font-medium">Thông tin</span>
+                <span className="text-sm font-medium">Profile</span>
               </button>
               <button
                 onClick={() => setActiveSection("password")}
@@ -209,7 +209,7 @@ function UserProfile() {
                 }`}
               >
                 <KeyRound className="w-5 h-5" />
-                <span className="text-sm font-medium">Mật khẩu</span>
+                <span className="text-sm font-medium">Password</span>
               </button>
             </div>
           </CardHeader>
@@ -222,7 +222,7 @@ function UserProfile() {
                   <div className="relative">
                     <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                     <Input
-                      placeholder="Tên đăng nhập"
+                      placeholder="Username"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
@@ -245,7 +245,7 @@ function UserProfile() {
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                     <Input
-                      placeholder="Số điện thoại"
+                      placeholder="Phone Number"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       required
@@ -258,7 +258,7 @@ function UserProfile() {
                 {success && (
                   <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-3 py-2 rounded-lg text-xs flex items-center">
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Cập nhật thông tin thành công!
+                    Profile updated successfully!
                   </div>
                 )}
                 {error && (
@@ -277,10 +277,10 @@ function UserProfile() {
                   {loading ? (
                     <div className="flex items-center justify-center">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Đang cập nhật...
+                      Updating...
                     </div>
                   ) : (
-                    "Cập nhật thông tin"
+                    "Update Profile"
                   )}
                 </Button>
               </form>
@@ -295,7 +295,7 @@ function UserProfile() {
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                     <Input
                       type={showOldPassword ? "text" : "password"}
-                      placeholder="Mật khẩu hiện tại"
+                      placeholder="Current password"
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       required
@@ -319,7 +319,7 @@ function UserProfile() {
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                     <Input
                       type={showNewPassword ? "text" : "password"}
-                      placeholder="Mật khẩu mới"
+                      placeholder="New password"
                       value={newPassword}
                       onChange={(e) => setNewPassword(e.target.value)}
                       required
@@ -343,7 +343,7 @@ function UserProfile() {
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-4 h-4" />
                     <Input
                       type={showConfirmPassword ? "text" : "password"}
-                      placeholder="Nhập lại mật khẩu mới"
+                      placeholder="Confirm new password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
@@ -369,7 +369,7 @@ function UserProfile() {
                 {success && (
                   <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-3 py-2 rounded-lg text-xs flex items-center">
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Cập nhật mật khẩu thành công!
+                    Password updated successfully!
                   </div>
                 )}
                 {error && (
@@ -388,10 +388,10 @@ function UserProfile() {
                   {loading ? (
                     <div className="flex items-center justify-center">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Đang cập nhật...
+                      Updating...
                     </div>
                   ) : (
-                    "Cập nhật mật khẩu"
+                    "Update Password"
                   )}
                 </Button>
               </form>

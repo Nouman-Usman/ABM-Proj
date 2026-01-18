@@ -1,5 +1,5 @@
-from services.road_services.AnalyzeOnRoadBase import AnalyzeOnRoadBase
-from core.config import settings_metric_transport
+from .services.road_services.AnalyzeOnRoadBase import AnalyzeOnRoadBase
+from .core.config import settings_metric_transport
 
 if __name__ == "__main__":
     # Example usage

@@ -20,12 +20,15 @@ class SettingMetricTransport:
         np.array([[50, 400], [50, 320], [390, 130], [550, 220], [480, 400]]),
     ]
 
+    # Get the absolute path to the app directory
+    _APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    
     PATH_VIDEOS = [
-        "./video_test/Văn Quán.mp4",
-        "./video_test/Văn Phú.mp4",
-        "./video_test/Nguyễn Trãi.mp4",
-        "./video_test/Ngã Tư Sở.mp4",
-        "./video_test/Đường Láng.mp4",
+        os.path.join(_APP_DIR, "video_tests/Video1.mp4"),
+        os.path.join(_APP_DIR, "video_tests/Video2.mp4"),
+        os.path.join(_APP_DIR, "video_tests/Video1.mp4"),
+        os.path.join(_APP_DIR, "video_tests/Video2.mp4"),
+        os.path.join(_APP_DIR, "video_tests/Video1.mp4"),
     ]
 
     METER_PER_PIXELS = [
@@ -35,18 +38,34 @@ class SettingMetricTransport:
                         0.15,
                         0.05
                         ]
-    MODELS_PATH = r'./ai_models/model N/openvino models/best_int8_openvino_model'
+    MODELS_PATH = os.path.join(_APP_DIR, "ai_models/model N/openvino models/best_int8_openvino_model")
 
     DEVICE = 'cpu'
 
 class SettingChatBot:
-    from langchain_google_genai import ChatGoogleGenerativeAI
-
-    LLM = ChatGoogleGenerativeAI(model="gemini-2.5-flash",
-                                temperature=0.6, 
-                                max_output_tokens=1024
-                                )
-    # Dùng ollama local api llm
+    _llm = None
+    
+    @classmethod
+    def get_llm(cls):
+        """Lazy load LLM to avoid multiprocessing issues on Windows"""
+        if cls._llm is None:
+            try:
+                from langchain_google_genai import ChatGoogleGenerativeAI
+                cls._llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash",
+                                                    temperature=0.6, 
+                                                    max_output_tokens=1024
+                                                    )
+            except Exception as e:
+                print(f"Failed to initialize Google Generative AI: {e}")
+                cls._llm = None
+        return cls._llm
+    
+    @property
+    def LLM(self):
+        """Property to access LLM with lazy loading"""
+        return self.get_llm()
+    
+    # Use ollama local api llm
     
     # from langchain_openai import OpenAI
     # LLM = OpenAI(model_name="gemma3:4b",
