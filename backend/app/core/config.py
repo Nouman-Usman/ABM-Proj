@@ -25,9 +25,9 @@ class SettingMetricTransport:
     
     PATH_VIDEOS = [
         os.path.join(_APP_DIR, "video_tests/Video1.mp4"),
-        os.path.join(_APP_DIR, "video_tests/Video2.mp4"),
         os.path.join(_APP_DIR, "video_tests/Video1.mp4"),
-        os.path.join(_APP_DIR, "video_tests/Video2.mp4"),
+        os.path.join(_APP_DIR, "video_tests/Video1.mp4"),
+        os.path.join(_APP_DIR, "video_tests/Video1.mp4"),
         os.path.join(_APP_DIR, "video_tests/Video1.mp4"),
     ]
 
