@@ -189,6 +189,10 @@ class AnalyzeOnRoadBase:
             track_data = self.speed_tool.track_data
             speeds_dict = self.speed_tool.spd  # dict: id -> speed
 
+            # Check that attributes are not None before calling .cpu()
+            if track_data.id is None or track_data.cls is None or track_data.xyxy is None:
+                return
+            
             ids = track_data.id.cpu().numpy().astype(np.int32)
             classes = track_data.cls.cpu().numpy().astype(np.int32)
             boxes = track_data.xyxy.cpu().numpy().astype(np.int32)
